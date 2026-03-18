@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+
+<style>
+  body {
+    width: 260px;
+    font-family: Arial;
+    text-align: center;
+    padding: 10px;
+    background: #f5f5f5;
+  }
+
+  #mainBox {
+    height: 140px;
+    background: white;
+    border: 2px solid #ddd;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  #timerUI {
+    display: none;
+  }
+
+  input {
+    width: 70%;
+    padding: 6px;
+    margin-top: 10px;
+  }
+
+  #startBtn {
+    margin-top: 10px;
+    padding: 6px 12px;
+    background: red;
+    color: white;
+    border: none;
+    cursor: pointer;
+  }
+
+  /* 🔥 UPDATED COUNTDOWN STYLE */
+  #countdown {
+    font-size: 28px;
+    font-weight: bold;
+    margin-top: 10px;
+  }
+
+  #bottomBtn {
+    margin-top: 10px;
+    width: 100%;
+    padding: 10px;
+    background: #87b5c9;
+    border: none;
+    cursor: pointer;
+  }
+</style>
+
+</head>
+
+<body>
+
+<div id="mainBox">
+
+  <div id="timerUI">
+    <h4>⏱ Set Timer</h4>
+    <input id="time" type="number" placeholder="Minutes">
+    <br>
+    <button id="startBtn">Start</button>
+
+    <!-- ✅ SAME DIV, JUST STYLED -->
+    <div id="countdown"></div>
+  </div>
+
+</div>
+
+<button id="bottomBtn">Set Timer</button>
+
+<script src="popup.js"></script>
+
+</body>
+</html>
