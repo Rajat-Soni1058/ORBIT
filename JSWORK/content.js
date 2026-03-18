@@ -11,4 +11,10 @@ chrome.runtime.onMessage.addListener((msg) => {
       console.log("⏸ Video paused");
     }
   }
+
+  // 🔔 ADD THIS BLOCK (DO NOT REMOVE ANYTHING ABOVE)
+  if (msg.action === "timeOverAlert") {
+    alert("⏰ Set Time Has Over");
+  }
+
 });

@@ -8,18 +8,48 @@ let interval = null;
 let totalSeconds = 0;
 let running = false;
 
+// 🔥 LOAD STATE ON OPEN
+window.onload = () => {
+
+  chrome.storage.local.get(["endTime"], (data) => {
+
+    if (data.endTime) {
+
+      const remaining = Math.floor((data.endTime - Date.now()) / 1000);
+
+      if (remaining > 0) {
+
+        totalSeconds = remaining;
+        running = true;
+
+        timerUI.style.display = "block";
+        input.style.display = "none";
+        startBtn.style.display = "none";
+        bottomBtn.innerText = "Reset Timer";
+
+        startCountdown();
+
+      }
+    }
+  });
+};
+
+
 // Show / Reset logic
 bottomBtn.addEventListener("click", () => {
 
   if (!running) {
     timerUI.style.display = "block";
   } else {
-    // 🔥 CANCEL BACKGROUND TIMER
+
+    // cancel background timer
     chrome.runtime.sendMessage({
       action: "cancelTimer"
     });
 
-    // stop UI timer
+    // clear storage
+    chrome.storage.local.remove("endTime");
+
     clearInterval(interval);
     running = false;
 
@@ -45,15 +75,13 @@ startBtn.addEventListener("click", () => {
     return;
   }
 
-  // 🔥 FIRST cancel any existing timer
-  chrome.runtime.sendMessage({
-    action: "cancelTimer"
-  });
+  // cancel previous timer
+  chrome.runtime.sendMessage({ action: "cancelTimer" });
 
   totalSeconds = Math.floor(minutes * 60);
   running = true;
 
-  // 🔥 START NEW TIMER
+  // start background timer
   chrome.runtime.sendMessage({
     action: "startTimer",
     time: parseFloat(minutes)
@@ -64,33 +92,42 @@ startBtn.addEventListener("click", () => {
   startBtn.style.display = "none";
   bottomBtn.innerText = "Reset Timer";
 
-  updateDisplay();
+  startCountdown();
+});
+
+
+// 🔥 COUNTDOWN FUNCTION (REUSABLE)
+function startCountdown() {
+
+  clearInterval(interval);
 
   interval = setInterval(() => {
 
     totalSeconds--;
-    updateDisplay();
 
     if (totalSeconds <= 0) {
-  clearInterval(interval);
+      clearInterval(interval);
 
-  countdown.innerText = "00:00";
-  running = false;
+      running = false;
+      countdown.innerText = "";
 
-  // 🔥 RESTORE UI
-  input.style.display = "block";
-  startBtn.style.display = "inline-block";
-  startBtn.innerText = "Start";
-  startBtn.disabled = false;
+      input.style.display = "block";
+      startBtn.style.display = "inline-block";
+      startBtn.innerText = "Start";
+      startBtn.disabled = false;
 
-  bottomBtn.innerText = "Set Timer";
-}
+      bottomBtn.innerText = "Set Timer";
+
+      return;
+    }
+
+    updateDisplay();
 
   }, 1000);
-});
+}
 
 
-// Update countdown UI
+// Update UI
 function updateDisplay() {
   let min = Math.floor(totalSeconds / 60);
   let sec = totalSeconds % 60;

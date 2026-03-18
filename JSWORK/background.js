@@ -6,59 +6,91 @@ chrome.runtime.onMessage.addListener((msg) => {
   // 🔥 START TIMER
   if (msg.action === "startTimer") {
 
-    // ❗ Clear any previous timer first
     chrome.alarms.clear("timerAlarm");
 
-    chrome.tabs.query({ url: "*://*.youtube.com/*" }, (tabs) => {
+    // store end time
+    const endTime = Date.now() + msg.time * 60 * 1000;
 
-      if (tabs.length > 0) {
-
-        youtubeTabId = tabs[0].id;
-
-        chrome.alarms.create("timerAlarm", {
-          delayInMinutes: msg.time
-        });
-
-        console.log("⏱ New timer started");
-      }
+    // ✅ FIXED (missing bracket)
+    chrome.storage.local.set({
+      endTime: endTime
     });
+
+    chrome.alarms.create("timerAlarm", {
+      delayInMinutes: msg.time
+    });
+
+    console.log("⏱ Timer started");
   }
 
-  // 🔥 CANCEL TIMER (RESET BUTTON)
+  // 🔥 CANCEL TIMER
   if (msg.action === "cancelTimer") {
 
-    chrome.alarms.clear("timerAlarm", (wasCleared) => {
-      if (wasCleared) {
-        console.log("❌ Timer cancelled");
-      }
-    });
+    chrome.alarms.clear("timerAlarm");
+    chrome.storage.local.remove("endTime");
 
     youtubeTabId = null;
+
+    console.log("❌ Timer cancelled");
   }
 
 });
 
 
-// When timer finishes
+// 🔥 WHEN TIMER FINISHES
 chrome.alarms.onAlarm.addListener((alarm) => {
 
   if (alarm.name === "timerAlarm") {
 
     console.log("⏰ Timer finished");
 
+    // 🔔 Chrome Notification
     chrome.notifications.create({
       type: "basic",
       iconUrl: "ClockImage.png",
       title: "⏰ Time Over",
-      message: "Your set time is over!"
+      message: "Pausing YouTube..."
+    }, (id) => {
+
+      if (chrome.runtime.lastError) {
+        console.log("❌ Notification Error:", chrome.runtime.lastError.message);
+      } else {
+        console.log("✅ Notification shown:", id);
+      }
+
     });
 
-    if (youtubeTabId !== null) {
+    // 🔥 FIND ALL YOUTUBE TABS
+    chrome.tabs.query({ url: "*://*.youtube.com/*" }, (tabs) => {
 
-      chrome.tabs.sendMessage(youtubeTabId, {
-        action: "pauseVideo"
+      if (tabs.length === 0) {
+        console.log("❌ No YouTube tab found");
+        return;
+      }
+
+      tabs.forEach(tab => {
+
+        // ⏸ Pause video
+        chrome.tabs.sendMessage(tab.id, {
+          action: "pauseVideo"
+        }, () => {
+          if (chrome.runtime.lastError) {
+            console.log("❌ Pause failed:", chrome.runtime.lastError);
+          } else {
+            console.log("✅ Pause sent to tab:", tab.id);
+          }
+        });
+
+        // 🔔 Show alert in page (100% reliable)
+        chrome.tabs.sendMessage(tab.id, {
+          action: "timeOverAlert"
+        });
+
       });
 
-    }
+    });
+
+    // clear storage after finish
+    chrome.storage.local.remove("endTime");
   }
 });
