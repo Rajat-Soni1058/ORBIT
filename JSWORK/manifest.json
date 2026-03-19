@@ -23,6 +23,12 @@
     "default_popup": "popup.html"
   },
 
+  "icons": {
+    "16": "ClockImage.png",
+    "48": "ClockImage.png",
+    "128": "ClockImage.png"
+  },
+
   "content_scripts": [
     {
       "matches": ["*://*.youtube.com/*"],

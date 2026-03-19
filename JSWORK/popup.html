@@ -80,7 +80,7 @@
   }
 
   /* 🔥 BOTTOM BUTTON */
-  #bottomBtn {
+  .orbital{
     margin-top: 12px;
     width: 100%;
     padding: 12px;
@@ -97,6 +97,15 @@
     transform: scale(1.02);
     opacity: 0.95;
   }
+#toggleRecommend:hover {
+   transform: scale(1.02);
+    opacity: 0.95;
+}
+#toggleComments:hover{
+    transform: scale(1.02);
+    opacity: 0.95;
+
+}
 </style>
 
 </head>
@@ -123,8 +132,9 @@
 </div>
 
 <!-- Bottom button -->
-<button id="bottomBtn">Set Timer</button>
-
+<button id="bottomBtn" class="orbital">Set Timer</button>
+<button id="toggleRecommend" class="orbital">Hide Recommendations</button>
+<button id="toggleComments" class="orbital">Hide Comments</button>
 <script src="popup.js"></script>
 
 </body>

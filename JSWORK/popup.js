@@ -3,16 +3,16 @@ const timerUI = document.getElementById("timerUI");
 const startBtn = document.getElementById("startBtn");
 const countdown = document.getElementById("countdown");
 const input = document.getElementById("time");
-
-// 🔥 NEW (message input)
 const messageInput = document.getElementById("customMessage");
+
+const toggleBtn = document.getElementById("toggleRecommend");
 
 let interval = null;
 let totalSeconds = 0;
 let running = false;
 
 
-// 🔥 LOAD STATE ON OPEN
+// LOAD STATE ON OPEN
 window.onload = () => {
 
   chrome.storage.local.get(["endTime"], (data) => {
@@ -28,7 +28,7 @@ window.onload = () => {
 
         timerUI.style.display = "block";
         input.style.display = "none";
-        messageInput.style.display = "none"; // 🔥 added
+        messageInput.style.display = "none";
         startBtn.style.display = "none";
         bottomBtn.innerText = "Reset Timer";
 
@@ -36,6 +36,15 @@ window.onload = () => {
       }
     }
   });
+
+  // Load toggle state safely
+  if (toggleBtn) {
+    chrome.storage.local.get("hideRecommended", (data) => {
+      toggleBtn.innerText = data.hideRecommended
+        ? "Show Recommendations"
+        : "Hide Recommendations";
+    });
+  }
 };
 
 
@@ -55,10 +64,9 @@ bottomBtn.addEventListener("click", () => {
     clearInterval(interval);
     running = false;
 
-    // reset UI
     countdown.innerText = "";
     input.style.display = "block";
-    messageInput.style.display = "block"; // 🔥 added
+    messageInput.style.display = "block";
     startBtn.style.display = "inline-block";
     startBtn.innerText = "Start";
     startBtn.disabled = false;
@@ -72,8 +80,6 @@ bottomBtn.addEventListener("click", () => {
 startBtn.addEventListener("click", () => {
 
   let minutes = input.value;
-
-  // 🔥 GET MESSAGE
   let userMessage = messageInput.value.trim();
 
   if (!minutes || minutes <= 0) {
@@ -81,7 +87,6 @@ startBtn.addEventListener("click", () => {
     return;
   }
 
-  // 🔥 DEFAULT MESSAGE
   if (userMessage === "") {
     userMessage = "⏰ Time is over!";
   }
@@ -91,16 +96,14 @@ startBtn.addEventListener("click", () => {
   totalSeconds = Math.floor(minutes * 60);
   running = true;
 
-  // 🔥 SEND MESSAGE ALSO
   chrome.runtime.sendMessage({
     action: "startTimer",
     time: parseFloat(minutes),
     message: userMessage
   });
 
-  // UI change
   input.style.display = "none";
-  messageInput.style.display = "none"; // 🔥 added
+  messageInput.style.display = "none";
   startBtn.style.display = "none";
   bottomBtn.innerText = "Reset Timer";
 
@@ -108,7 +111,7 @@ startBtn.addEventListener("click", () => {
 });
 
 
-// 🔥 COUNTDOWN FUNCTION
+// Countdown
 function startCountdown() {
 
   clearInterval(interval);
@@ -124,10 +127,9 @@ function startCountdown() {
       countdown.innerText = "";
 
       input.style.display = "block";
-      messageInput.style.display = "block"; // 🔥 added
+      messageInput.style.display = "block";
       startBtn.style.display = "inline-block";
       startBtn.innerText = "Start";
-      startBtn.disabled = false;
 
       bottomBtn.innerText = "Set Timer";
 
@@ -147,4 +149,42 @@ function updateDisplay() {
 
   countdown.innerText =
     `${String(min).padStart(2, "0")}:${String(sec).padStart(2, "0")}`;
+}
+
+
+// =========================
+// TOGGLE RECOMMENDATIONS
+// =========================
+
+if (toggleBtn) {
+
+  toggleBtn.addEventListener("click", () => {
+
+    chrome.storage.local.get("hideRecommended", (data) => {
+
+      const newState = !data.hideRecommended;
+
+      chrome.storage.local.set({
+        hideRecommended: newState
+      });
+
+      toggleBtn.innerText = newState
+        ? "Show Recommendations"
+        : "Hide Recommendations";
+
+      chrome.tabs.query({ url: "*://*.youtube.com/*" }, (tabs) => {
+
+        tabs.forEach(tab => {
+          chrome.tabs.sendMessage(tab.id, {
+            action: "toggleRecommendations",
+            hide: newState
+          });
+        });
+
+      });
+
+    });
+
+  });
+
 }
