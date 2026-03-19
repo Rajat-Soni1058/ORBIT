@@ -12,9 +12,15 @@ chrome.runtime.onMessage.addListener((msg) => {
     }
   }
 
-  // 🔔 ADD THIS BLOCK (DO NOT REMOVE ANYTHING ABOVE)
+  // 🔔 UPDATED (USE MESSAGE FROM BACKGROUND)
   if (msg.action === "timeOverAlert") {
-    alert("⏰ Set Time Has Over");
+    if(msg.message){
+    alert(  "📢))) "+msg.message);
+    }
+  else {
+    alert( "🚨 STOP WATCHING, Your Set Time is over!");
+    
+  }
   }
 
 });

@@ -5,56 +5,97 @@
 
 <style>
   body {
-    width: 260px;
-    font-family: Arial;
+    width: 280px;
+    font-family: "Segoe UI", Arial, sans-serif;
     text-align: center;
-    padding: 10px;
-    background: #f5f5f5;
+    padding: 12px;
+    background: #f3f6f9;
   }
 
+  /* 🔥 MODERN CARD */
   #mainBox {
-    height: 140px;
+    min-height: 200px;
     background: white;
-    border: 2px solid #ddd;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    padding: 15px;
+    transition: all 0.3s ease;
   }
 
   #timerUI {
     display: none;
+    width: 100%;
   }
 
+  h4 {
+    margin-bottom: 10px;
+    color: #333;
+  }
+
+  /* 🔥 INPUT STYLE */
   input {
-    width: 70%;
-    padding: 6px;
-    margin-top: 10px;
+    width: 85%;
+    padding: 10px;
+    margin-top: 8px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    outline: none;
+    font-size: 14px;
+    transition: 0.2s;
   }
 
+  input:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 5px rgba(0,123,255,0.3);
+  }
+
+  /* 🔥 START BUTTON */
   #startBtn {
-    margin-top: 10px;
-    padding: 6px 12px;
-    background: red;
+    margin-top: 12px;
+    padding: 8px 18px;
+    background: linear-gradient(135deg, #ff4d4d, #e60000);
     color: white;
     border: none;
+    border-radius: 6px;
     cursor: pointer;
+    font-size: 14px;
+    transition: 0.2s;
   }
 
-  /* 🔥 UPDATED COUNTDOWN STYLE */
+  #startBtn:hover {
+    transform: scale(1.05);
+    opacity: 0.9;
+  }
+
+  /* 🔥 COUNTDOWN STYLE */
   #countdown {
-    font-size: 28px;
+    font-size: 30px;
     font-weight: bold;
-    margin-top: 10px;
+    margin-top: 12px;
+    color: #222;
   }
 
+  /* 🔥 BOTTOM BUTTON */
   #bottomBtn {
-    margin-top: 10px;
+    margin-top: 12px;
     width: 100%;
-    padding: 10px;
-    background: #87b5c9;
+    padding: 12px;
+    background: linear-gradient(135deg, #87b5c9, #5c9fb8);
     border: none;
+    border-radius: 8px;
     cursor: pointer;
+    font-size: 15px;
+    color: white;
+    transition: 0.2s;
+  }
+
+  #bottomBtn:hover {
+    transform: scale(1.02);
+    opacity: 0.95;
   }
 </style>
 
@@ -66,16 +107,22 @@
 
   <div id="timerUI">
     <h4>⏱ Set Timer</h4>
+
+    <!-- Minutes input -->
     <input id="time" type="number" placeholder="Minutes">
-    <br>
+
+    <!-- Message input -->
+    <input id="customMessage" type="text" placeholder="Message (optional)">
+
     <button id="startBtn">Start</button>
 
-    <!-- ✅ SAME DIV, JUST STYLED -->
+    <!-- Countdown -->
     <div id="countdown"></div>
   </div>
 
 </div>
 
+<!-- Bottom button -->
 <button id="bottomBtn">Set Timer</button>
 
 <script src="popup.js"></script>

@@ -4,9 +4,13 @@ const startBtn = document.getElementById("startBtn");
 const countdown = document.getElementById("countdown");
 const input = document.getElementById("time");
 
+// 🔥 NEW (message input)
+const messageInput = document.getElementById("customMessage");
+
 let interval = null;
 let totalSeconds = 0;
 let running = false;
+
 
 // 🔥 LOAD STATE ON OPEN
 window.onload = () => {
@@ -24,11 +28,11 @@ window.onload = () => {
 
         timerUI.style.display = "block";
         input.style.display = "none";
+        messageInput.style.display = "none"; // 🔥 added
         startBtn.style.display = "none";
         bottomBtn.innerText = "Reset Timer";
 
         startCountdown();
-
       }
     }
   });
@@ -42,12 +46,10 @@ bottomBtn.addEventListener("click", () => {
     timerUI.style.display = "block";
   } else {
 
-    // cancel background timer
     chrome.runtime.sendMessage({
       action: "cancelTimer"
     });
 
-    // clear storage
     chrome.storage.local.remove("endTime");
 
     clearInterval(interval);
@@ -56,6 +58,7 @@ bottomBtn.addEventListener("click", () => {
     // reset UI
     countdown.innerText = "";
     input.style.display = "block";
+    messageInput.style.display = "block"; // 🔥 added
     startBtn.style.display = "inline-block";
     startBtn.innerText = "Start";
     startBtn.disabled = false;
@@ -70,25 +73,34 @@ startBtn.addEventListener("click", () => {
 
   let minutes = input.value;
 
+  // 🔥 GET MESSAGE
+  let userMessage = messageInput.value.trim();
+
   if (!minutes || minutes <= 0) {
     alert("Enter valid time");
     return;
   }
 
-  // cancel previous timer
+  // 🔥 DEFAULT MESSAGE
+  if (userMessage === "") {
+    userMessage = "⏰ Time is over!";
+  }
+
   chrome.runtime.sendMessage({ action: "cancelTimer" });
 
   totalSeconds = Math.floor(minutes * 60);
   running = true;
 
-  // start background timer
+  // 🔥 SEND MESSAGE ALSO
   chrome.runtime.sendMessage({
     action: "startTimer",
-    time: parseFloat(minutes)
+    time: parseFloat(minutes),
+    message: userMessage
   });
 
   // UI change
   input.style.display = "none";
+  messageInput.style.display = "none"; // 🔥 added
   startBtn.style.display = "none";
   bottomBtn.innerText = "Reset Timer";
 
@@ -96,7 +108,7 @@ startBtn.addEventListener("click", () => {
 });
 
 
-// 🔥 COUNTDOWN FUNCTION (REUSABLE)
+// 🔥 COUNTDOWN FUNCTION
 function startCountdown() {
 
   clearInterval(interval);
@@ -112,6 +124,7 @@ function startCountdown() {
       countdown.innerText = "";
 
       input.style.display = "block";
+      messageInput.style.display = "block"; // 🔥 added
       startBtn.style.display = "inline-block";
       startBtn.innerText = "Start";
       startBtn.disabled = false;
