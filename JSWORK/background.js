@@ -11,9 +11,10 @@ chrome.runtime.onMessage.addListener((msg) => {
     // store end time
     const endTime = Date.now() + msg.time * 60 * 1000;
 
-    // ✅ FIXED (missing bracket)
+    // 🔥 ADD message storage (DO NOT REMOVE ANYTHING)
     chrome.storage.local.set({
-      endTime: endTime
+      endTime: endTime,
+      userMessage: msg.message   // 👈 ADDED
     });
 
     chrome.alarms.create("timerAlarm", {
@@ -27,7 +28,9 @@ chrome.runtime.onMessage.addListener((msg) => {
   if (msg.action === "cancelTimer") {
 
     chrome.alarms.clear("timerAlarm");
-    chrome.storage.local.remove("endTime");
+
+    // 🔥 ALSO REMOVE MESSAGE (ADDED)
+    chrome.storage.local.remove(["endTime", "userMessage"]);
 
     youtubeTabId = null;
 
@@ -44,53 +47,56 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 
     console.log("⏰ Timer finished");
 
-    // 🔔 Chrome Notification
-    chrome.notifications.create({
-      type: "basic",
-      iconUrl: "ClockImage.png",
-      title: "⏰ Time Over",
-      message: "Pausing YouTube..."
-    }, (id) => {
+    // 🔥 GET MESSAGE FROM STORAGE (ADDED)
+    chrome.storage.local.get("userMessage", (data) => {
 
-      if (chrome.runtime.lastError) {
-        console.log("❌ Notification Error:", chrome.runtime.lastError.message);
-      } else {
-        console.log("✅ Notification shown:", id);
-      }
+      const finalMessage = data.userMessage || "⏰ Time is over!";
 
-    });
+      // 🔔 Chrome Notification (UPDATED MESSAGE)
+      chrome.notifications.create({
+        type: "basic",
+        iconUrl: "ClockImage.png",
+        title: "⏰ Time Over",
+        message: finalMessage   // 👈 UPDATED
+      }, (id) => {
 
-    // 🔥 FIND ALL YOUTUBE TABS
-    chrome.tabs.query({ url: "*://*.youtube.com/*" }, (tabs) => {
+        if (chrome.runtime.lastError) {
+          console.log("❌ Notification Error:", chrome.runtime.lastError.message);
+        } else {
+          console.log("✅ Notification shown:", id);
+        }
 
-      if (tabs.length === 0) {
-        console.log("❌ No YouTube tab found");
-        return;
-      }
+      });
 
-      tabs.forEach(tab => {
+      // 🔥 FIND ALL YOUTUBE TABS
+      chrome.tabs.query({ url: "*://*.youtube.com/*" }, (tabs) => {
 
-        // ⏸ Pause video
-        chrome.tabs.sendMessage(tab.id, {
-          action: "pauseVideo"
-        }, () => {
-          if (chrome.runtime.lastError) {
-            console.log("❌ Pause failed:", chrome.runtime.lastError);
-          } else {
-            console.log("✅ Pause sent to tab:", tab.id);
-          }
-        });
+        if (tabs.length === 0) {
+          console.log("❌ No YouTube tab found");
+          return;
+        }
 
-        // 🔔 Show alert in page (100% reliable)
-        chrome.tabs.sendMessage(tab.id, {
-          action: "timeOverAlert"
+        tabs.forEach(tab => {
+
+          // ⏸ Pause video
+          chrome.tabs.sendMessage(tab.id, {
+            action: "pauseVideo"
+          });
+
+          // 🔔 SEND MESSAGE TO ALERT (UPDATED)
+          chrome.tabs.sendMessage(tab.id, {
+            action: "timeOverAlert",
+            message: finalMessage   // 👈 ADDED
+          });
+
         });
 
       });
 
+      // clear storage after finish
+      chrome.storage.local.remove(["endTime", "userMessage"]);
+
     });
 
-    // clear storage after finish
-    chrome.storage.local.remove("endTime");
   }
 });
