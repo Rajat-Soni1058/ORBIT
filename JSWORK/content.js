@@ -85,3 +85,66 @@ chrome.storage.local.get("hideRecommended", (data) => {
   }
 
 });
+
+
+/// HIDE THE COMMENT OF YOUTUBE ------------>
+// Comment toggle logic
+let commentInterval = null;
+
+function applyCommentMode(hide) {
+
+  const hideComments = () => {
+
+    // Normal video comments
+    const comments = document.querySelector("ytd-comments");
+
+    if (comments) {
+      comments.style.display = hide ? "none" : "";
+    }
+
+    // ===== ADDED: SHORTS COMMENTS =====
+
+    // Shorts comment panel (new UI)
+    const shortsPanel1 = document.querySelector("ytd-engagement-panel-section-list-renderer");
+    if (shortsPanel1) {
+      shortsPanel1.style.display = hide ? "none" : "";
+    }
+
+    // Shorts alternative panel
+    const shortsPanel2 = document.querySelector("ytd-reel-engagement-panel-renderer");
+    if (shortsPanel2) {
+      shortsPanel2.style.display = hide ? "none" : "";
+    }
+
+    // =================================
+
+  };
+
+  hideComments();
+
+  if (commentInterval) clearInterval(commentInterval);
+
+  if (hide) {
+    commentInterval = setInterval(hideComments, 1000);
+  }
+}
+
+
+// LISTENER
+chrome.runtime.onMessage.addListener((msg) => {
+
+  if (msg.action === "toggleComments") {
+    applyCommentMode(msg.hide);
+    console.log("Comments:", msg.hide ? "Hidden" : "Visible");
+  }
+
+});
+
+/////////
+chrome.storage.local.get("hideComments", (data) => {
+
+  if (data.hideComments) {
+    applyCommentMode(true);
+  }
+
+});

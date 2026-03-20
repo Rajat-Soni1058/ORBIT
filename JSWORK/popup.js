@@ -152,9 +152,9 @@ function updateDisplay() {
 }
 
 
-// =========================
+
 // TOGGLE RECOMMENDATIONS
-// =========================
+
 
 if (toggleBtn) {
 
@@ -177,6 +177,49 @@ if (toggleBtn) {
         tabs.forEach(tab => {
           chrome.tabs.sendMessage(tab.id, {
             action: "toggleRecommendations",
+            hide: newState
+          });
+        });
+
+      });
+
+    });
+
+  });
+
+}
+///////////// comment off------------>
+const commentBtn = document.getElementById("toggleComments");
+
+if (commentBtn) {
+
+  // Load state
+  chrome.storage.local.get("hideComments", (data) => {
+    commentBtn.innerText = data.hideComments
+      ? "Show Comments"
+      : "Hide Comments";
+  });
+
+  // Click
+  commentBtn.addEventListener("click", () => {
+
+    chrome.storage.local.get("hideComments", (data) => {
+
+      const newState = !data.hideComments;
+
+      chrome.storage.local.set({
+        hideComments: newState
+      });
+
+      commentBtn.innerText = newState
+        ? "Show Comments"
+        : "Hide Comments";
+
+      chrome.tabs.query({ url: "*://*.youtube.com/*" }, (tabs) => {
+
+        tabs.forEach(tab => {
+          chrome.tabs.sendMessage(tab.id, {
+            action: "toggleComments",
             hide: newState
           });
         });
