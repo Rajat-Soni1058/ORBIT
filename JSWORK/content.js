@@ -1,7 +1,12 @@
-console.log("content.js loaded");
+//---------INITIAL LOAD LOG------------>
+console.log("ho gai bhaiya ---> content.js loaded");
 
+
+
+//---------MESSAGE LISTENER (VIDEO CONTROL + ALERT + RECOMMENDATIONS)------------>
 chrome.runtime.onMessage.addListener((msg) => {
 
+  //---------PAUSE VIDEO FEATURE------------>
   if (msg.action === "pauseVideo") {
 
     let video = document.querySelector("video");
@@ -11,13 +16,9 @@ chrome.runtime.onMessage.addListener((msg) => {
       console.log("⏸ Video paused");
     }
 
-    // ADD THIS (DO NOT REMOVE ABOVE CODE)
-
-    // Pause ALL videos (helps for Shorts + multiple players)
     const allVideos = document.querySelectorAll("video");
     allVideos.forEach(v => v.pause());
 
-    // Extra fix specifically for YouTube Shorts
     const shortsVideo = document.querySelector("ytd-reel-video-renderer video");
     if (shortsVideo) {
       shortsVideo.pause();
@@ -25,30 +26,27 @@ chrome.runtime.onMessage.addListener((msg) => {
     }
   }
 
-  // UPDATED (USE MESSAGE FROM BACKGROUND)
+
+  //---------TIME OVER ALERT FEATURE------------>
   if (msg.action === "timeOverAlert") {
+
     if (msg.message) {
       alert("📢))) " + msg.message);
     } else {
       alert("🚨 STOP WATCHING, Your Set Time is over!");
     }
+
   }
 
-  // ADD THIS BLOCK (FOCUS MODE)
+
+  //---------RECOMMENDATION TOGGLE FEATURE------------>
   if (msg.action === "toggleRecommendations") {
 
     const hide = msg.hide;
 
-    // Homepage videos
     const home = document.querySelector("ytd-rich-grid-renderer");
-
-    // Sidebar (right side)
     const sidebar = document.getElementById("secondary");
-
-    // Below video suggestions
     const related = document.querySelector("ytd-watch-next-secondary-results-renderer");
-
-    // Shorts shelf
     const shorts = document.querySelectorAll("ytd-reel-shelf-renderer");
 
     if (home) home.style.display = hide ? "none" : "block";
@@ -65,7 +63,8 @@ chrome.runtime.onMessage.addListener((msg) => {
 });
 
 
-// AUTO APPLY ON PAGE LOAD
+
+//---------AUTO APPLY RECOMMENDATION STATE------------>
 chrome.storage.local.get("hideRecommended", (data) => {
 
   if (data.hideRecommended) {
@@ -87,37 +86,22 @@ chrome.storage.local.get("hideRecommended", (data) => {
 });
 
 
-/// HIDE THE COMMENT OF YOUTUBE ------------>
-// Comment toggle logic
+
+//---------COMMENT FEATURE (HIDE / SHOW COMMENTS WITH INTERVAL FIX)------------>
 let commentInterval = null;
 
 function applyCommentMode(hide) {
 
   const hideComments = () => {
 
-    // Normal video comments
     const comments = document.querySelector("ytd-comments");
+    if (comments) comments.style.display = hide ? "none" : "";
 
-    if (comments) {
-      comments.style.display = hide ? "none" : "";
-    }
-
-    // ===== ADDED: SHORTS COMMENTS =====
-
-    // Shorts comment panel (new UI)
     const shortsPanel1 = document.querySelector("ytd-engagement-panel-section-list-renderer");
-    if (shortsPanel1) {
-      shortsPanel1.style.display = hide ? "none" : "";
-    }
+    if (shortsPanel1) shortsPanel1.style.display = hide ? "none" : "";
 
-    // Shorts alternative panel
     const shortsPanel2 = document.querySelector("ytd-reel-engagement-panel-renderer");
-    if (shortsPanel2) {
-      shortsPanel2.style.display = hide ? "none" : "";
-    }
-
-    // =================================
-
+    if (shortsPanel2) shortsPanel2.style.display = hide ? "none" : "";
   };
 
   hideComments();
@@ -130,7 +114,8 @@ function applyCommentMode(hide) {
 }
 
 
-// LISTENER
+
+//---------MESSAGE LISTENER (COMMENT TOGGLE)------------>
 chrome.runtime.onMessage.addListener((msg) => {
 
   if (msg.action === "toggleComments") {
@@ -140,11 +125,170 @@ chrome.runtime.onMessage.addListener((msg) => {
 
 });
 
-/////////
-chrome.storage.local.get("hideComments", (data) => {
 
-  if (data.hideComments) {
-    applyCommentMode(true);
+
+//---------AUTO APPLY COMMENT STATE------------>
+chrome.storage.local.get("hideComments", (data) => {
+  if (data.hideComments) applyCommentMode(true);
+});
+
+
+
+//---------NOTES FEATURE (BUTTON + STORAGE + UI)------------>
+let noteButtonObserver = null;
+let noteContainerWaiter = null;
+
+
+
+//---------GET NOTE BUTTON CONTAINER------------>
+function getNoteButtonContainer() {
+  return (
+    document.querySelector("ytd-watch-metadata #top-level-buttons-computed") ||
+    document.querySelector("ytd-watch-flexy #top-level-buttons-computed")
+  );
+}
+
+
+
+//---------ADD NOTE BUTTON TO YOUTUBE UI------------>
+function addNoteButton(container) {
+
+  if (!container) return;
+  if (container.querySelector("#addNoteBtn")) return;
+
+  document.querySelectorAll("#addNoteBtn").forEach((el) => {
+    if (!container.contains(el)) el.remove();
+  });
+
+  const btn = document.createElement("button");
+  btn.id = "addNoteBtn";
+
+  btn.innerHTML = `
+    <div style="display:flex; align-items:center; gap:6px;">
+      <span style="font-size:16px;">➕</span>
+      <span>Add Notes</span>
+    </div>
+  `;
+
+  btn.style.background = "#f2f2f2";
+  btn.style.border = "none";
+  btn.style.borderRadius = "18px";
+  btn.style.padding = "6px 12px";
+  btn.style.marginLeft = "8px";
+  btn.style.cursor = "pointer";
+  btn.style.fontSize = "14px";
+  btn.style.display = "flex";
+  btn.style.alignItems = "center";
+
+  btn.onmouseenter = () => btn.style.background = "#e6e6e6";
+  btn.onmouseleave = () => btn.style.background = "#f2f2f2";
+
+
+
+  //---------NOTE SAVE LOGIC------------>
+  btn.onclick = () => {
+
+    let videoId = new URLSearchParams(window.location.search).get("v");
+
+    if (!videoId && window.location.pathname.includes("/shorts/")) {
+      videoId = window.location.pathname.split("/shorts/")[1];
+    }
+
+    if (!videoId) {
+      alert("Open a video first to add notes.");
+      return;
+    }
+
+    chrome.storage.local.get("notes", (data) => {
+
+      let notes = data.notes || {};
+
+      if (!notes[videoId]) {
+
+        const title = prompt("Enter note title:");
+        if (!title) return;
+
+        const content = prompt("Write your note:");
+        if (!content) return;
+
+        notes[videoId] = { title, content };
+
+      } else {
+
+        const newContent = prompt("Add more to your notes:");
+        if (!newContent) return;
+
+        notes[videoId].content += "\n" + newContent;
+      }
+
+      chrome.storage.local.set({ notes }, () => {
+        alert("Note saved");
+      });
+
+    });
+
+  };
+
+
+
+  //---------BUTTON PLACEMENT------------>
+  const buttons = container.querySelectorAll("button");
+
+  if (buttons.length > 0) {
+    buttons[buttons.length - 1].after(btn);
+  } else {
+    container.appendChild(btn);
+  }
+}
+
+
+
+//---------OBSERVER FEATURE (HANDLE YOUTUBE DYNAMIC UI)------------>
+function attachButtonObserver() {
+
+  if (noteButtonObserver) {
+    noteButtonObserver.disconnect();
+    noteButtonObserver = null;
   }
 
+  if (noteContainerWaiter) {
+    clearInterval(noteContainerWaiter);
+    noteContainerWaiter = null;
+  }
+
+  noteContainerWaiter = setInterval(() => {
+
+    const container = getNoteButtonContainer();
+
+    if (!container) return;
+
+    clearInterval(noteContainerWaiter);
+    noteContainerWaiter = null;
+
+    addNoteButton(container);
+
+    noteButtonObserver = new MutationObserver(() => {
+      addNoteButton(container);
+    });
+
+    noteButtonObserver.observe(container, {
+      childList: true,
+      subtree: true
+    });
+
+  }, 300);
+}
+
+
+
+//---------INITIAL LOAD------------>
+attachButtonObserver();
+
+
+
+//---------YOUTUBE NAVIGATION HANDLING------------>
+window.addEventListener("yt-navigate-finish", () => {
+  setTimeout(() => {
+    attachButtonObserver();
+  }, 500);
 });

@@ -1,9 +1,12 @@
+//---------GLOBAL STATE (YOUTUBE TAB TRACKING)------------>
 let youtubeTabId = null;
 
-// Listen for messages
+
+
+//---------MESSAGE LISTENER FEATURE (START + CANCEL TIMER)------------>
 chrome.runtime.onMessage.addListener((msg) => {
 
-  // 🔥 START TIMER
+  //---------START TIMER------------>
   if (msg.action === "startTimer") {
 
     chrome.alarms.clear("timerAlarm");
@@ -11,10 +14,10 @@ chrome.runtime.onMessage.addListener((msg) => {
     // store end time
     const endTime = Date.now() + msg.time * 60 * 1000;
 
-    // 🔥 ADD message storage (DO NOT REMOVE ANYTHING)
+    // store timer data at chrome local 
     chrome.storage.local.set({
       endTime: endTime,
-      userMessage: msg.message   // 👈 ADDED
+      userMessage: msg.message
     });
 
     chrome.alarms.create("timerAlarm", {
@@ -24,12 +27,13 @@ chrome.runtime.onMessage.addListener((msg) => {
     console.log("⏱ Timer started");
   }
 
-  // 🔥 CANCEL TIMER
+
+  //---------CANCEL TIMER------------>
   if (msg.action === "cancelTimer") {
 
     chrome.alarms.clear("timerAlarm");
 
-    // 🔥 ALSO REMOVE MESSAGE (ADDED)
+    // remove stored data
     chrome.storage.local.remove(["endTime", "userMessage"]);
 
     youtubeTabId = null;
@@ -40,24 +44,24 @@ chrome.runtime.onMessage.addListener((msg) => {
 });
 
 
-// 🔥 WHEN TIMER FINISHES
+
+//---------ALARM FEATURE (WHEN TIMER FINISHES)------------>
 chrome.alarms.onAlarm.addListener((alarm) => {
 
   if (alarm.name === "timerAlarm") {
 
-    console.log("⏰ Timer finished");
-
-    // 🔥 GET MESSAGE FROM STORAGE (ADDED)
+    //---------GET STORED MESSAGE------------>
     chrome.storage.local.get("userMessage", (data) => {
 
       const finalMessage = data.userMessage || "⏰ Time is over!";
 
-      // 🔔 Chrome Notification (UPDATED MESSAGE)
+
+      //---------SHOW NOTIFICATION------------>
       chrome.notifications.create({
         type: "basic",
         iconUrl: "ClockImage.png",
         title: "⏰ Time Over",
-        message: finalMessage   // 👈 UPDATED
+        message: finalMessage
       }, (id) => {
 
         if (chrome.runtime.lastError) {
@@ -68,7 +72,8 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 
       });
 
-      // 🔥 FIND ALL YOUTUBE TABS
+
+      //---------YOUTUBE CONTROL (PAUSE + ALERT)------------>
       chrome.tabs.query({ url: "*://*.youtube.com/*" }, (tabs) => {
 
         if (tabs.length === 0) {
@@ -78,22 +83,23 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 
         tabs.forEach(tab => {
 
-          // ⏸ Pause video
+          // pause video
           chrome.tabs.sendMessage(tab.id, {
             action: "pauseVideo"
           });
 
-          // 🔔 SEND MESSAGE TO ALERT (UPDATED)
+          // show alert on page
           chrome.tabs.sendMessage(tab.id, {
             action: "timeOverAlert",
-            message: finalMessage   // 👈 ADDED
+            message: finalMessage
           });
 
         });
 
       });
 
-      // clear storage after finish
+
+      //---------CLEANUP STORAGE------------>
       chrome.storage.local.remove(["endTime", "userMessage"]);
 
     });
