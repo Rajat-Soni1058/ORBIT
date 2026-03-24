@@ -31,7 +31,7 @@
     width: 100%;
   }
 
-  /* ✅ NEW: NOTES VIEW */
+  /* NOTES VIEW */
   #notesView {
     display: none;
     width: 100%;
@@ -101,7 +101,8 @@
   #bottomBtn:hover,
   #toggleRecommend:hover,
   #toggleComments:hover,
-  #showNotes:hover{
+  #showNotes:hover,
+  #toggleDark:hover {
     transform: scale(1.02);
     opacity: 0.95;
   }
@@ -125,12 +126,24 @@
     <div id="countdown"></div>
   </div>
 
-  <!-- ✅ NEW: NOTES VIEW -->
+  <!-- NOTES VIEW -->
   <div id="notesView"></div>
 
 </div>
 
-<button id="bottomBtn" class="orbital">Set Timer</button>
+<!-- 🔥 UPDATED BUTTON SECTION -->
+<div style="display: flex; gap: 8px; width: 100%;">
+
+  <button id="bottomBtn" class="orbital" style="flex: 1;">
+    Set Timer
+  </button>
+
+  <button id="toggleDark" class="orbital" style="flex: 1;">
+    🌙 Dark Mode
+  </button>
+
+</div>
+
 <button id="toggleRecommend" class="orbital">Hide Recommendations</button>
 <button id="toggleComments" class="orbital">Hide Comments</button>
 <button id="showNotes" class="orbital">📁 Show Notes</button>

@@ -65,25 +65,27 @@ chrome.runtime.onMessage.addListener((msg) => {
 
 
 //---------AUTO APPLY RECOMMENDATION STATE------------>
-chrome.storage.local.get("hideRecommended", (data) => {
+function autoApplyRecommendationState() {
+  chrome.storage.local.get("hideRecommended", (data) => {
 
-  if (data.hideRecommended) {
+    if (data.hideRecommended) {
 
-    const home = document.querySelector("ytd-rich-grid-renderer");
-    const sidebar = document.getElementById("secondary");
-    const related = document.querySelector("ytd-watch-next-secondary-results-renderer");
-    const shorts = document.querySelectorAll("ytd-reel-shelf-renderer");
+      const home = document.querySelector("ytd-rich-grid-renderer");
+      const sidebar = document.getElementById("secondary");
+      const related = document.querySelector("ytd-watch-next-secondary-results-renderer");
+      const shorts = document.querySelectorAll("ytd-reel-shelf-renderer");
 
-    if (home) home.style.display = "none";
-    if (sidebar) sidebar.style.display = "none";
-    if (related) related.style.display = "none";
+      if (home) home.style.display = "none";
+      if (sidebar) sidebar.style.display = "none";
+      if (related) related.style.display = "none";
 
-    shorts.forEach(s => s.style.display = "none");
+      shorts.forEach(s => s.style.display = "none");
 
-    console.log("Focus Mode auto-applied");
-  }
+      console.log("Focus Mode auto-applied");
+    }
 
-});
+  });
+}
 
 
 
@@ -128,9 +130,11 @@ chrome.runtime.onMessage.addListener((msg) => {
 
 
 //---------AUTO APPLY COMMENT STATE------------>
-chrome.storage.local.get("hideComments", (data) => {
-  if (data.hideComments) applyCommentMode(true);
-});
+function autoApplyCommentState() {
+  chrome.storage.local.get("hideComments", (data) => {
+    if (data.hideComments) applyCommentMode(true);
+  });
+}
 
 
 
@@ -146,6 +150,10 @@ function getNoteButtonContainer() {
     document.querySelector("ytd-watch-metadata #top-level-buttons-computed") ||
     document.querySelector("ytd-watch-flexy #top-level-buttons-computed")
   );
+}
+
+function isWatchPage() {
+  return window.location.pathname === "/watch";
 }
 
 
@@ -256,11 +264,24 @@ function attachButtonObserver() {
     noteContainerWaiter = null;
   }
 
+  if (!isWatchPage()) return;
+
+  let attempts = 0;
+  const maxAttempts = 20;
+
   noteContainerWaiter = setInterval(() => {
+
+    attempts++;
 
     const container = getNoteButtonContainer();
 
-    if (!container) return;
+    if (!container) {
+      if (attempts >= maxAttempts) {
+        clearInterval(noteContainerWaiter);
+        noteContainerWaiter = null;
+      }
+      return;
+    }
 
     clearInterval(noteContainerWaiter);
     noteContainerWaiter = null;
@@ -282,7 +303,30 @@ function attachButtonObserver() {
 
 
 //---------INITIAL LOAD------------>
-attachButtonObserver();
+function initNonCriticalFeatures() {
+  autoApplyRecommendationState();
+  autoApplyCommentState();
+  attachButtonObserver();
+}
+
+function scheduleNonCriticalInit() {
+  if (typeof requestIdleCallback === "function") {
+    requestIdleCallback(() => {
+      initNonCriticalFeatures();
+    }, { timeout: 1500 });
+    return;
+  }
+
+  setTimeout(() => {
+    initNonCriticalFeatures();
+  }, 250);
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", scheduleNonCriticalInit, { once: true });
+} else {
+  scheduleNonCriticalInit();
+}
 
 
 
@@ -292,3 +336,76 @@ window.addEventListener("yt-navigate-finish", () => {
     attachButtonObserver();
   }, 500);
 });
+
+//-------------Dark/Light mode---------->
+//---------DARK MODE FEATURE (NATIVE-LIKE BEHAVIOR)------------>
+let darkModeEnabled = false;
+
+function setDarkMode(enabled) {
+  if (enabled) {
+    document.documentElement.setAttribute("dark", "");
+  } else {
+    document.documentElement.removeAttribute("dark");
+  }
+}
+
+function getCookie(name) {
+  const row = document.cookie
+    .split(";")
+    .map(v => v.trim())
+    .find(v => v.startsWith(name + "="));
+
+  if (!row) return "";
+  return row.substring(name.length + 1);
+}
+
+function setYoutubeThemePreference(enabled) {
+  const rawPref = decodeURIComponent(getCookie("PREF") || "");
+  const prefPairs = rawPref ? rawPref.split("&") : [];
+  const prefMap = {};
+
+  prefPairs.forEach((pair) => {
+    const idx = pair.indexOf("=");
+    if (idx === -1) return;
+    const key = pair.slice(0, idx);
+    const value = pair.slice(idx + 1);
+    if (key) prefMap[key] = value;
+  });
+
+  // YouTube theme flag: f6=400 for dark, f6=0 for light.
+  prefMap.f6 = enabled ? "400" : "0";
+
+  const nextPref = Object.entries(prefMap)
+    .map(([k, v]) => `${k}=${v}`)
+    .join("&");
+
+  document.cookie = `PREF=${encodeURIComponent(nextPref)}; path=/; domain=.youtube.com; max-age=31536000; SameSite=Lax`;
+}
+
+function applyYoutubeTheme(enabled) {
+  setYoutubeThemePreference(enabled);
+  setDarkMode(enabled);
+}
+
+function applyDarkModeFromStorage() {
+  chrome.storage.local.get("darkMode", (data) => {
+
+    darkModeEnabled = Boolean(data.darkMode);
+    applyYoutubeTheme(darkModeEnabled);
+
+  });
+}
+
+chrome.runtime.onMessage.addListener((msg) => {
+
+  if (msg.action === "toggleDarkMode") {
+
+    darkModeEnabled = Boolean(msg.enabled);
+    applyYoutubeTheme(darkModeEnabled);
+
+  }
+
+});
+
+// Run once when script loads.
+applyDarkModeFromStorage();

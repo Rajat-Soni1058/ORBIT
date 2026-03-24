@@ -371,3 +371,45 @@ function updateDisplay() {
 
   });
 }
+
+// 🌙 DARK MODE TOGGLE
+const darkBtn = document.getElementById("toggleDark");
+
+if (darkBtn) {
+
+  // Load saved state
+  chrome.storage.local.get("darkMode", (data) => {
+    darkBtn.innerText = data.darkMode
+      ? "☀️ Light Mode"
+      : "🌙 Dark Mode";
+  });
+
+  darkBtn.addEventListener("click", () => {
+
+    chrome.storage.local.get("darkMode", (data) => {
+
+      const newState = !data.darkMode;
+
+      chrome.storage.local.set({ darkMode: newState });
+
+      darkBtn.innerText = newState
+        ? "☀️ Light Mode"
+        : "🌙 Dark Mode";
+
+      // Send message to YouTube tabs
+      chrome.tabs.query({ url: "*://*.youtube.com/*" }, (tabs) => {
+
+        tabs.forEach(tab => {
+          chrome.tabs.sendMessage(tab.id, {
+            action: "toggleDarkMode",
+            enabled: newState
+          });
+        });
+
+      });
+
+    });
+
+  });
+
+}
