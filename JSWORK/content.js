@@ -3,56 +3,6 @@ console.log("ho gai bhaiya ---> content.js loaded");
 
 
 
-//---------THEME DETECTION & REAPPLY LOGIC------------>
-let currentTheme = document.documentElement.hasAttribute('dark') ? 'dark' : 'light';
-
-function refreshThemeElements() {
-  // Force refresh of theme-dependent elements
-  autoApplyRecommendationState();
-  autoApplyCommentState();
-  attachButtonObserver();
-  
-  // Trigger YouTube to refresh search and shorts elements
-  const searchInputs = document.querySelectorAll('input[aria-label*="Search"]');
-  const shorts = document.querySelectorAll('ytd-reel-shelf-renderer');
-  
-  // Force re-render by triggering a forced style recalculation
-  [searchInputs, shorts].forEach(elements => {
-    elements.forEach(el => {
-      if (el.style) {
-        const originalDisplay = el.style.display;
-        el.style.display = 'none';
-        el.offsetHeight; // trigger reflow
-        el.style.display = originalDisplay;
-      }
-    });
-  });
-  
-  console.log("✅ Theme elements refreshed after theme change");
-}
-
-const themeObserver = new MutationObserver(() => {
-  const newTheme = document.documentElement.hasAttribute('dark') ? 'dark' : 'light';
-  
-  if (newTheme !== currentTheme) {
-    console.log("🎨 Theme changed from", currentTheme, "to", newTheme);
-    currentTheme = newTheme;
-    
-    // Delay to ensure YouTube has processed the theme change
-    setTimeout(() => {
-      refreshThemeElements();
-    }, 800);
-  }
-});
-
-// Listen for theme changes on html element
-themeObserver.observe(document.documentElement, {
-  attributes: true,
-  attributeFilter: ['dark']
-});
-
-
-
 //---------MESSAGE LISTENER (VIDEO CONTROL + ALERT + RECOMMENDATIONS)------------>
 chrome.runtime.onMessage.addListener((msg) => {
 
@@ -462,10 +412,10 @@ chrome.runtime.onMessage.addListener((msg) => {
     darkModeEnabled = Boolean(msg.enabled);
     applyYoutubeTheme(darkModeEnabled);
     
-    // Refresh theme elements after dark mode toggle
+    // Let YouTube rebuild the page with the new PREF theme.
     setTimeout(() => {
-      refreshThemeElements();
-    }, 1000);
+      window.location.reload();
+    }, 150);
 
   }
 
