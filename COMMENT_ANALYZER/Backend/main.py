@@ -114,13 +114,13 @@ def analyze_sentiment_batch(comments: List[str], chunk_size: int = 128):
     Returns either aggregated counts dict OR list of labels.
     """
     if not comments:
-        return {"positive": 0, "negative": 0}
+        return {"positive": 0, "negative": 0, "neutral": 0}
 
     if tokenizer is None or sentiment_model is None:
         # Safe fallback stub: heuristic keyword matching so endpoint stays operational.
         positive_keywords = {"love", "great", "awesome", "good", "nice", "best"}
         negative_keywords = {"bad", "worst", "hate", "awful", "terrible", "poor"}
-        pos, neg = 0, 0
+        pos, neg, neu = 0, 0, 0
 
         for text in comments:
             lower_text = str(text).lower()
@@ -130,8 +130,10 @@ def analyze_sentiment_batch(comments: List[str], chunk_size: int = 128):
                 pos += 1
             elif has_neg and not has_pos:
                 neg += 1
+            else:
+                neu += 1
 
-        return {"positive": pos, "negative": neg}
+        return {"positive": pos, "negative": neg, "neutral": neu}
 
     labels: List[str] = []
     for start in range(0, len(comments), chunk_size):
@@ -160,17 +162,20 @@ def aggregate_pos_neg(result) -> dict:
         return {
             "positive": int(result.get("positive", 0)),
             "negative": int(result.get("negative", 0)),
+            "neutral": int(result.get("neutral", 0)),
         }
 
     if isinstance(result, list):
-        pos, neg = 0, 0
+        pos, neg, neu = 0, 0, 0
         for label in result:
             label_text = str(label).lower()
             if "pos" in label_text:
                 pos += 1
             elif "neg" in label_text:
                 neg += 1
-        return {"positive": pos, "negative": neg}
+            else:
+                neu += 1
+        return {"positive": pos, "negative": neg, "neutral": neu}
 
     raise ValueError("Unsupported inference return type. Expected dict or list.")
 
