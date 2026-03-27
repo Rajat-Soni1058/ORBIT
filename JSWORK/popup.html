@@ -5,30 +5,36 @@
 
 <style>
   body {
-    width: 280px;
+    width: 420px;
     font-family: "Segoe UI", Arial, sans-serif;
     text-align: center;
     padding: 12px;
-    background: #f3f6f9;
+    background: #ffffff;
   }
 
   /* MODERN CARD */
   #mainBox {
-    min-height: 200px;
-    background:white;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    min-height: 220px;
+    max-height: 240px; /* show ~3 notes worth of height */
+    overflow-y: auto; /* make the white card itself scrollable */
+    background: #ffffff;
+    border-radius: 14px;
+    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 15px;
+    align-items: stretch; /* allow white canvas to occupy fixed area without vertical centering */
+    justify-content: flex-start;
+    padding: 16px;
     transition: all 0.3s ease;
+    border: 1px solid #eef2f7;
   }
 
   #timerUI {
     display: none;
     width: 100%;
+    box-sizing: border-box;
+    /* allow timer UI to fill the card area */
+    flex: 0 0 auto;
   }
 
   /* NOTES VIEW */
@@ -36,8 +42,155 @@
     display: none;
     width: 100%;
     text-align: left;
-    max-height: 180px;
-    overflow-y: auto;
+    /* fill remaining vertical space inside the card and scroll internally */
+    flex: 1 1 auto;
+    min-height: 0; /* allow proper flexbox behavior */
+    overflow: visible; /* let the parent card handle scrolling */
+    padding: 4px 4px 0 4px;
+    box-sizing: border-box;
+  }
+
+  #notesView::-webkit-scrollbar {
+    width: 0; /* disable inner scrollbar visuals */
+  }
+
+  /* scrollbar for the white card */
+  #mainBox::-webkit-scrollbar {
+    width: 10px;
+  }
+
+  #mainBox::-webkit-scrollbar-thumb {
+    background: #cfd8e3;
+    border-radius: 8px;
+  }
+
+  .notes-header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 2px 2px 8px;
+    color: #1f2937;
+    font-weight: 700;
+    font-size: 16px;
+    text-align: center;
+  }
+
+  .notes-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  /* fix note card height so exactly ~3 cards fit in the visible area */
+  .note-card {
+    min-height: 64px;
+    height: 64px;
+  }
+
+  .note-card {
+    border-radius: 14px;
+    padding: 10px 12px;
+    min-height: auto;
+    box-shadow: 0 4px 10px rgba(15, 23, 42, 0.09);
+    border: 1px solid rgba(17, 24, 39, 0.06);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: 6px;
+  }
+
+  .note-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .note-title {
+    margin: 0;
+    font-size: 16px;
+    line-height: 1.2;
+    color: #1f2937;
+    font-weight: 700;
+    word-break: break-word;
+  }
+
+  .note-bullet {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    margin-right: 8px;
+    background: #111827;
+    border-radius: 50%;
+    vertical-align: middle;
+  }
+
+  .note-preview {
+    margin: 0;
+    color: #334155;
+    font-size: 12px;
+    line-height: 1.35;
+    min-height: 34px;
+  }
+
+  .note-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 8px;
+    margin: 0;
+  }
+
+  .open-note-btn {
+    margin: 6px 0 0 0;
+    display: inline-block;
+    color: #0f172a;
+    font-weight: 600;
+    text-decoration: none;
+    font-size: 14px;
+  }
+
+  .open-note-btn {
+    color: #0f172a;
+    font-size: 12px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  .open-note-btn:hover {
+    text-decoration: underline;
+  }
+
+  .delete-note-btn {
+    cursor: pointer;
+    font-size: 15px;
+    color: #b42318;
+    transition: transform 0.15s ease;
+  }
+
+  .notes-empty {
+    margin: 6px 0 4px;
+    color: #64748b;
+    font-size: 13px;
+    text-align: center;
+  }
+
+  .notes-loading {
+    padding: 28px 14px;
+    color: #475569;
+    text-align: center;
+    font-size: 14px;
+  }
+
+  @media (max-width: 460px) {
+    body {
+      width: 360px;
+    }
+
+    .notes-grid {
+      grid-template-columns: 1fr;
+    }
   }
 
   h4 {
@@ -98,6 +251,48 @@
     transition: 0.2s;
   }
 
+  /* ORBIT animated brand */
+  .orbit-brand {
+    font-weight: 900;
+    color: #0f172a;
+    font-size: 34px;
+    letter-spacing: 6px;
+    display: inline-block;
+    text-align: center;
+  }
+
+  /* when user clicks any button for the first time, make ORBIT text white */
+  .orbit-white {
+    color: #ffffff !important;
+  }
+
+  /* one-shot, non-layout animation: uses transform/opacity only to avoid reflow */
+  .orbit-animate {
+    will-change: transform, opacity;
+    animation: orbitPop 850ms cubic-bezier(.2,.9,.3,1) both;
+  }
+
+  @keyframes orbitPop {
+    0% {
+      transform: scale(0.72) translateY(4px);
+      opacity: 0;
+    }
+    60% {
+      transform: scale(1.06) translateY(-2px);
+      opacity: 1;
+    }
+    100% {
+      transform: scale(1) translateY(0);
+      opacity: 1;
+    }
+  }
+
+  .orbit-letters span {
+    display: inline-block;
+    transform-origin: center;
+  }
+
+
   #bottomBtn:hover,
   #toggleRecommend:hover,
   #toggleComments:hover,
@@ -105,6 +300,27 @@
   #toggleDark:hover {
     transform: scale(1.02);
     opacity: 0.95;
+  }
+
+  /* emptyView fixed area and opacity-based show/hide to avoid layout flashes */
+  #emptyView {
+    /* let emptyView fill the available card area so layout doesn't jump */
+    flex: 1 1 auto;
+    min-height: 0;
+    transition: opacity 220ms ease, visibility 220ms;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  #emptyView.empty-visible {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
   }
 </style>
 
@@ -129,9 +345,16 @@
   <!-- NOTES VIEW -->
   <div id="notesView"></div>
 
+  <!-- EMPTY / BRAND VIEW -->
+  <div id="emptyView" style="width:100%; height:220px;">
+    <div style="text-align:center;">
+      <div class="orbit-brand" aria-hidden="true"><strong>ORBIT</strong></div>
+    </div>
+  </div>
+
 </div>
 
-<!-- 🔥 UPDATED BUTTON SECTION -->
+<!-- UPDATED BUTTON SECTION -->
 <div style="display: flex; gap: 8px; width: 100%;">
 
   <button id="bottomBtn" class="orbital" style="flex: 1;">
@@ -146,7 +369,12 @@
 
 <button id="toggleRecommend" class="orbital">Hide Recommendations</button>
 <button id="toggleComments" class="orbital">Hide Comments</button>
-<button id="showNotes" class="orbital">📁 Show Notes</button>
+
+<!-- Row: My Notes + Video Analyzer (split like the top buttons) -->
+<div style="display:flex; gap:8px; width:100%;">
+  <button id="showNotes" class="orbital" style="flex:1;">📁 MY Notes</button>
+  <button id="analyzeVideo" class="orbital" style="flex:1;">🔎 Video Analyzer</button>
+</div>
 
 <script src="popup.js"></script>
 

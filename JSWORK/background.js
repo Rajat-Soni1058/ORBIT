@@ -106,3 +106,35 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 
   }
 });
+
+// ---------- FORWARD MODEL REQUESTS FROM POPUP (AVOIDS POPUP CORS ISSUES) ----------
+chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+  if (msg && msg.action === 'analyzeBatch' && Array.isArray(msg.batch) && msg.apiUrl) {
+    (async () => {
+      try {
+        const res = await fetch(msg.apiUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ comments: msg.batch })
+        });
+
+        const text = await res.text();
+        let json = null;
+        try { json = text ? JSON.parse(text) : null; } catch (e) { json = text; }
+
+        if (!res.ok) {
+          sendResponse({ ok: false, status: res.status, statusText: res.statusText, body: json });
+          return;
+        }
+
+        sendResponse({ ok: true, body: json });
+      } catch (err) {
+        sendResponse({ ok: false, error: String(err) });
+      }
+    })();
+
+    return true; // will respond asynchronously
+  }
+
+  // other messages
+});

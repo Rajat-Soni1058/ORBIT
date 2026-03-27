@@ -62,6 +62,67 @@ chrome.runtime.onMessage.addListener((msg) => {
 
 });
 
+// ---------COMMENT EXTRACTION FOR ANALYZER (scrape up to requested max)---------
+chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+  if (msg.action !== 'extractComments') return;
+
+  (async () => {
+    const max = Number(msg.max) || 1000;
+    const collected = new Set();
+
+    // helper to collect currently rendered top-level comment texts
+    function collectNow() {
+      // YouTube top-level comment text elements
+      const nodes = document.querySelectorAll('ytd-comment-thread-renderer #content-text, ytd-comment-renderer #content-text, yt-formatted-string#content-text');
+      nodes.forEach(n => {
+        const t = n.innerText && n.innerText.trim();
+        if (t) collected.add(t);
+      });
+    }
+
+    try {
+      collectNow();
+
+      // attempt to load more comments by scrolling the comments area / window
+      let lastSize = collected.size;
+      let stableCount = 0;
+      const maxStability = 10; // stop if no new comments after several attempts
+
+      for (let i = 0; i < 120 && collected.size < max; i++) {
+        // scroll comments container if available
+        const commentsContainer = document.querySelector('ytd-comments #contents, ytd-item-section-renderer#sections');
+        if (commentsContainer) {
+          commentsContainer.scrollIntoView({ behavior: 'smooth', block: 'end' });
+        } else {
+          window.scrollBy({ top: window.innerHeight, behavior: 'smooth' });
+        }
+
+        await new Promise(r => setTimeout(r, 700));
+        collectNow();
+
+        if (collected.size === lastSize) {
+          stableCount++;
+          if (stableCount >= maxStability) break;
+        } else {
+          lastSize = collected.size;
+          stableCount = 0;
+        }
+      }
+
+      const comments = Array.from(collected).slice(0, max);
+      sendResponse({ comments });
+
+    } catch (err) {
+      console.error('extractComments error', err);
+      sendResponse({ error: String(err) });
+    }
+
+  })();
+
+  // indicate we'll call sendResponse asynchronously
+  return true;
+});
+
 
 
 //---------AUTO APPLY RECOMMENDATION STATE------------>
