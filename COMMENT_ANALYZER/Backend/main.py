@@ -248,7 +248,7 @@ def analyze_spam(data: CommentBatch):
 
         results = []
 
-        # 🔥 counters
+        #  counters
         spam_count, not_spam_count = 0, 0
 
         for i, text in enumerate(comments):
