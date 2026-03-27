@@ -349,13 +349,27 @@ window.addEventListener("yt-navigate-finish", () => {
 //-------------Dark/Light mode---------->
 //---------DARK MODE FEATURE (NATIVE-LIKE BEHAVIOR)------------>
 let darkModeEnabled = false;
+const THEME_SYNC_RELOAD_KEY = "withinorbit_theme_sync_reload_done";
 
-function setDarkMode(enabled) {
+function isYoutubeCurrentlyDark() {
+  return document.documentElement.hasAttribute("dark");
+}
+
+function applyThemeFallback(enabled) {
+  const ytdApp = document.querySelector("ytd-app");
+
   if (enabled) {
     document.documentElement.setAttribute("dark", "");
-  } else {
-    document.documentElement.removeAttribute("dark");
+    document.documentElement.setAttribute("dark-theme", "");
+    if (document.body) document.body.classList.add("dark-theme");
+    if (ytdApp) ytdApp.setAttribute("dark", "");
+    return;
   }
+
+  document.documentElement.removeAttribute("dark");
+  document.documentElement.removeAttribute("dark-theme");
+  if (document.body) document.body.classList.remove("dark-theme");
+  if (ytdApp) ytdApp.removeAttribute("dark");
 }
 
 function getCookie(name) {
@@ -393,7 +407,6 @@ function setYoutubeThemePreference(enabled) {
 
 function applyYoutubeTheme(enabled) {
   setYoutubeThemePreference(enabled);
-  setDarkMode(enabled);
 }
 
 function applyDarkModeFromStorage() {
@@ -401,6 +414,24 @@ function applyDarkModeFromStorage() {
 
     darkModeEnabled = Boolean(data.darkMode);
     applyYoutubeTheme(darkModeEnabled);
+
+    const domDark = isYoutubeCurrentlyDark();
+
+    // If stored preference and rendered theme mismatch, reload once to let YouTube
+    // rebuild all CSS variables and components from a single theme source.
+    if (domDark !== darkModeEnabled) {
+      if (!sessionStorage.getItem(THEME_SYNC_RELOAD_KEY)) {
+        sessionStorage.setItem(THEME_SYNC_RELOAD_KEY, "1");
+        window.location.reload();
+        return;
+      }
+
+      // YouTube did not apply PREF theme after reload, so force fallback once.
+      applyThemeFallback(darkModeEnabled);
+      sessionStorage.removeItem(THEME_SYNC_RELOAD_KEY);
+    } else {
+      sessionStorage.removeItem(THEME_SYNC_RELOAD_KEY);
+    }
 
   });
 }
@@ -411,11 +442,10 @@ chrome.runtime.onMessage.addListener((msg) => {
 
     darkModeEnabled = Boolean(msg.enabled);
     applyYoutubeTheme(darkModeEnabled);
-    
-    // Let YouTube rebuild the page with the new PREF theme.
-    setTimeout(() => {
-      window.location.reload();
-    }, 150);
+    applyThemeFallback(darkModeEnabled);
+
+    sessionStorage.removeItem(THEME_SYNC_RELOAD_KEY);
+    window.location.reload();
 
   }
 
