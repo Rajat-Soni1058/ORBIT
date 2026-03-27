@@ -21,7 +21,7 @@ class CommentBatch(BaseModel):
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 SENTIMENT_MODEL_DIR = os.path.join(
-    BASE_DIR, "results", "final_distilbert_sentiment")
+    BASE_DIR, "results", "distilbert")
 ID2LABEL = {0: "negative", 1: "neutral", 2: "positive"}
 
 tokenizer = AutoTokenizer.from_pretrained(SENTIMENT_MODEL_DIR)
