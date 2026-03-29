@@ -4,6 +4,7 @@ console.log("ho gai bhaiya ---> content.js loaded");
 //---------RECOMMENDATION FEATURE (PERSISTENT APPLY)------------>
 let recommendationInterval = null;
 
+
 function applyRecommendationMode(hide) {
 
   const hideRecommendations = () => {

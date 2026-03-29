@@ -2,6 +2,22 @@
 let interval = null;
 let totalSeconds = 0;
 let running = false;
+// ================== RATING FUNCTION ==================
+function calculateRating(sentiment, likes = 0) {
+  const pos = sentiment.positive || 0;
+  const neg = sentiment.negative || 0;
+
+  const total = pos + neg;
+  const sentimentScore = total === 0 ? 0.5 : pos / total;
+
+  const likeScore = Math.min(Math.log10(likes + 1) / 5, 1);
+
+  const rating = (0.7 * sentimentScore + 0.3 * likeScore) * 10;
+
+  return rating.toFixed(1);
+}
+
+
 
 // Helper to show/hide empty ORBIT brand depending on UI state
 function updateEmptyView() {
@@ -643,26 +659,57 @@ function updateDisplay() {
 
           // show aggregated results
           document.getElementById('analyzerStatus').innerText = 'Analysis complete';
+
+          //rating
+          
+
+const sentiment = {
+  positive: totalPositive,
+  negative: totalNegative
+};
+
+// since popup can't access DOM likes → keep 0 OR optional later
+const rating = calculateRating(sentiment, 0);
+
+console.log("⭐ Rating (popup):", rating);
+//-----
           const results = document.getElementById('analyzerResults');
           results.innerHTML = `
-            <div style="font-size:18px; font-weight:700;">Sentiment Summary</div>
-            <div style="display:flex; flex-direction:column; align-items:center; gap:12px; margin-top:12px; padding:12px 12px 18px; box-sizing:border-box;">
-              <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap; width:100%;">
-                <div style="background:#d1fae5; padding:12px 18px; border-radius:8px; min-width:100px;">
-                  <div style="font-size:14px; color:#065f46;">Positive</div>
-                  <div style="font-size:20px; font-weight:800; color:#065f46;">${totalPositive}</div>
-                </div>
-                <div style="background:#fee2e2; padding:12px 18px; border-radius:8px; min-width:100px;">
-                  <div style="font-size:14px; color:#991b1b;">Negative</div>
-                  <div style="font-size:20px; font-weight:800; color:#991b1b;">${totalNegative}</div>
-                </div>
-              </div>
-              <div style="background:#f8fafc; padding:12px 18px; border-radius:8px; min-width:100px;">
-                <div style="font-size:14px; color:#334155;">Neutral</div>
-                <div style="font-size:20px; font-weight:800; color:#334155;">${totalNeutral}</div>
-              </div>
-            </div>
-          `;
+  <div style="font-size:18px; font-weight:700;">Sentiment Summary</div>
+
+  <div style="display:flex; flex-direction:column; align-items:center; gap:12px; margin-top:12px; padding:12px 12px 18px; box-sizing:border-box;">
+    
+    <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap; width:100%;">
+      
+      <div style="background:#d1fae5; padding:12px 18px; border-radius:8px; min-width:100px;">
+        <div style="font-size:14px; color:#065f46;">Positive</div>
+        <div style="font-size:20px; font-weight:800; color:#065f46;">${totalPositive}</div>
+      </div>
+
+      <div style="background:#fee2e2; padding:12px 18px; border-radius:8px; min-width:100px;">
+        <div style="font-size:14px; color:#991b1b;">Negative</div>
+        <div style="font-size:20px; font-weight:800; color:#991b1b;">${totalNegative}</div>
+      </div>
+
+    </div>
+
+    <div style="display:flex; gap:12px; justify-content:center;">
+      
+      <div style="background:#f8fafc; padding:12px 18px; border-radius:8px; min-width:100px;">
+        <div style="font-size:14px; color:#334155;">Neutral</div>
+        <div style="font-size:20px; font-weight:800; color:#334155;">${totalNeutral}</div>
+      </div>
+
+      <!-- ⭐ NEW RATING CARD -->
+      <div style="background:#111; padding:12px 18px; border-radius:8px; min-width:100px;">
+        <div style="font-size:14px; color:#fff;">Rating</div>
+        <div style="font-size:20px; font-weight:800; color:#fff;">⭐ ${rating}/10</div>
+      </div>
+
+    </div>
+
+  </div>
+`;
 
         });
 
