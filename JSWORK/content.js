@@ -1,6 +1,36 @@
 //---------INITIAL LOAD LOG------------>
 console.log("ho gai bhaiya ---> content.js loaded");
 
+//---------RECOMMENDATION FEATURE (PERSISTENT APPLY)------------>
+let recommendationInterval = null;
+
+function applyRecommendationMode(hide) {
+
+  const hideRecommendations = () => {
+    const home = document.querySelector("ytd-rich-grid-renderer");
+    const sidebar = document.getElementById("secondary");
+    const related = document.querySelector("ytd-watch-next-secondary-results-renderer");
+    const shorts = document.querySelectorAll("ytd-reel-shelf-renderer");
+
+    if (home) home.style.display = hide ? "none" : "";
+    if (sidebar) sidebar.style.display = hide ? "none" : "";
+    if (related) related.style.display = hide ? "none" : "";
+
+    shorts.forEach(s => {
+      s.style.display = hide ? "none" : "";
+    });
+  };
+
+  hideRecommendations();
+
+  if (recommendationInterval) clearInterval(recommendationInterval);
+
+  if (hide) {
+    // YouTube renders recommendations lazily; keep applying while hidden mode is active.
+    recommendationInterval = setInterval(hideRecommendations, 1000);
+  }
+}
+
 
 
 //---------MESSAGE LISTENER (VIDEO CONTROL + ALERT + RECOMMENDATIONS)------------>
@@ -41,22 +71,8 @@ chrome.runtime.onMessage.addListener((msg) => {
 
   //---------RECOMMENDATION TOGGLE FEATURE------------>
   if (msg.action === "toggleRecommendations") {
-
-    const hide = msg.hide;
-
-    const home = document.querySelector("ytd-rich-grid-renderer");
-    const sidebar = document.getElementById("secondary");
-    const related = document.querySelector("ytd-watch-next-secondary-results-renderer");
-    const shorts = document.querySelectorAll("ytd-reel-shelf-renderer");
-
-    if (home) home.style.display = hide ? "none" : "block";
-    if (sidebar) sidebar.style.display = hide ? "none" : "block";
-    if (related) related.style.display = hide ? "none" : "block";
-
-    shorts.forEach(s => {
-      s.style.display = hide ? "none" : "block";
-    });
-
+    const hide = Boolean(msg.hide);
+    applyRecommendationMode(hide);
     console.log("Focus Mode:", hide ? "ON" : "OFF");
   }
 
@@ -72,8 +88,10 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 
     // helper to collect currently rendered top-level comment texts
     function collectNow() {
-      // YouTube top-level comment text elements
-      const nodes = document.querySelectorAll('ytd-comment-thread-renderer #content-text, ytd-comment-renderer #content-text, yt-formatted-string#content-text');
+      // YouTube video + Shorts comment text elements
+      const nodes = document.querySelectorAll(
+        'ytd-comment-thread-renderer #content-text, ytd-comment-renderer #content-text, ytd-reel-comment-renderer #content-text, ytd-engagement-panel-section-list-renderer #content-text, yt-formatted-string#content-text, yt-attributed-string#content-text'
+      );
       nodes.forEach(n => {
         const t = n.innerText && n.innerText.trim();
         if (t) collected.add(t);
@@ -90,7 +108,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 
       for (let i = 0; i < 120 && collected.size < max; i++) {
         // scroll comments container if available
-        const commentsContainer = document.querySelector('ytd-comments #contents, ytd-item-section-renderer#sections');
+        const commentsContainer = document.querySelector('ytd-comments #contents, ytd-item-section-renderer#sections, ytd-engagement-panel-section-list-renderer #content, ytd-engagement-panel-section-list-renderer #contents');
         if (commentsContainer) {
           commentsContainer.scrollIntoView({ behavior: 'smooth', block: 'end' });
         } else {
@@ -128,20 +146,9 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 //---------AUTO APPLY RECOMMENDATION STATE------------>
 function autoApplyRecommendationState() {
   chrome.storage.local.get("hideRecommended", (data) => {
+    applyRecommendationMode(Boolean(data.hideRecommended));
 
     if (data.hideRecommended) {
-
-      const home = document.querySelector("ytd-rich-grid-renderer");
-      const sidebar = document.getElementById("secondary");
-      const related = document.querySelector("ytd-watch-next-secondary-results-renderer");
-      const shorts = document.querySelectorAll("ytd-reel-shelf-renderer");
-
-      if (home) home.style.display = "none";
-      if (sidebar) sidebar.style.display = "none";
-      if (related) related.style.display = "none";
-
-      shorts.forEach(s => s.style.display = "none");
-
       console.log("Focus Mode auto-applied");
     }
 
@@ -403,6 +410,7 @@ if (document.readyState === "loading") {
 //---------YOUTUBE NAVIGATION HANDLING------------>
 window.addEventListener("yt-navigate-finish", () => {
   setTimeout(() => {
+    autoApplyRecommendationState();
     attachButtonObserver();
   }, 500);
 });

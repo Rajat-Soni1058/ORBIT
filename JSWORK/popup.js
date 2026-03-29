@@ -135,7 +135,7 @@ window.onload = () => {
       startBtn.innerText = "Start";
       startBtn.disabled = false;
 
-      bottomBtn.innerText = "Set Timer";
+      bottomBtn.innerText = "🕔 Set Timer";
 
       // update empty view after reset
       updateEmptyView();
@@ -214,7 +214,7 @@ function startCountdown() {
       messageInput.style.display = "block";
       startBtn.style.display = "inline-block";
       startBtn.innerText = "Start";
-      bottomBtn.innerText = "Set Timer";
+      bottomBtn.innerText = "🕔 Set Timer";
       // timer ended — update empty/brand visibility
       updateEmptyView();
       return;
@@ -565,7 +565,7 @@ function updateDisplay() {
             return;
           }
 
-          document.getElementById('analyzerStatus').innerText = `Analyzing ${comments.length} comments…`;
+          document.getElementById('analyzerStatus').innerText = `Found ${comments.length}/${maxComments} comments. Analyzing available comments…`;
 
           // send comments to model in batches
           const apiUrl = 'http://43.205.213.66:8000/analyze_sentiment';
@@ -646,18 +646,20 @@ function updateDisplay() {
           const results = document.getElementById('analyzerResults');
           results.innerHTML = `
             <div style="font-size:18px; font-weight:700;">Sentiment Summary</div>
-            <div style="display:flex; gap:12px; justify-content:center; margin-top:12px; flex-wrap:wrap;">
-              <div style="background:#d1fae5; padding:12px 18px; border-radius:8px; min-width:100px;">
-                <div style="font-size:14px; color:#065f46;">Positive</div>
-                <div style="font-size:20px; font-weight:800; color:#065f46;">${totalPositive}</div>
+            <div style="display:flex; flex-direction:column; align-items:center; gap:12px; margin-top:12px; padding:12px 12px 18px; box-sizing:border-box;">
+              <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap; width:100%;">
+                <div style="background:#d1fae5; padding:12px 18px; border-radius:8px; min-width:100px;">
+                  <div style="font-size:14px; color:#065f46;">Positive</div>
+                  <div style="font-size:20px; font-weight:800; color:#065f46;">${totalPositive}</div>
+                </div>
+                <div style="background:#fee2e2; padding:12px 18px; border-radius:8px; min-width:100px;">
+                  <div style="font-size:14px; color:#991b1b;">Negative</div>
+                  <div style="font-size:20px; font-weight:800; color:#991b1b;">${totalNegative}</div>
+                </div>
               </div>
               <div style="background:#f8fafc; padding:12px 18px; border-radius:8px; min-width:100px;">
                 <div style="font-size:14px; color:#334155;">Neutral</div>
                 <div style="font-size:20px; font-weight:800; color:#334155;">${totalNeutral}</div>
-              </div>
-              <div style="background:#fee2e2; padding:12px 18px; border-radius:8px; min-width:100px;">
-                <div style="font-size:14px; color:#991b1b;">Negative</div>
-                <div style="font-size:20px; font-weight:800; color:#991b1b;">${totalNegative}</div>
               </div>
             </div>
           `;
@@ -679,8 +681,8 @@ if (darkBtn) {
   // Load saved state
   chrome.storage.local.get("darkMode", (data) => {
     darkBtn.innerText = data.darkMode
-      ? "☀️ Light Mode"
-      : "🌙 Dark Mode";
+      ? "🌓 Light Mode"
+      : "🌓 Dark Mode";
   });
 
   darkBtn.addEventListener("click", () => {
@@ -692,8 +694,8 @@ if (darkBtn) {
       chrome.storage.local.set({ darkMode: newState });
 
       darkBtn.innerText = newState
-        ? "☀️ Light Mode"
-        : "🌙 Dark Mode";
+        ? "🌓 Light Mode"
+        : "🌓 Dark Mode";
 
       // Send message to YouTube tabs
       chrome.tabs.query({ url: "*://*.youtube.com/*" }, (tabs) => {
