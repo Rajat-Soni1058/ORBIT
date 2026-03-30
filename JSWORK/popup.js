@@ -786,4 +786,64 @@ try { chrome.storage.local.remove('orbitTextWhite'); } catch (e) { /* ignore */ 
   document.addEventListener('click', clickHandler, true);
 })();
 
+//pdf generator logic
+const pdfBtn = document.getElementById("generatePDF");
 
+if (pdfBtn) {
+  pdfBtn.addEventListener("click", generatePDF);
+}
+
+function generatePDF() {
+
+  chrome.storage.local.get("snapshots", (data) => {
+
+    const snaps = data.snapshots || [];
+
+    if (snaps.length === 0) {
+      alert("No snapshots available");
+      return;
+    }
+
+    const printWindow = window.open("", "_blank");
+
+    let html = `
+      <html>
+      <head>
+        <title>Snapshots PDF</title>
+        <style>
+          body { text-align:center; font-family:sans-serif; }
+          img { width:90%; margin:20px 0; page-break-after: always; }
+        </style>
+      </head>
+      <body>
+    `;
+
+    snaps.forEach(snap => {
+  html += `<img src="${snap.img}" />`;
+});
+
+    html += `</body></html>`;
+
+    printWindow.document.write(html);
+    printWindow.document.close();
+
+    printWindow.onload = () => {
+      printWindow.print();
+
+      // clear storage after use
+      chrome.storage.local.remove("snapshots");
+    };
+
+  });
+}
+//-----------
+
+const clearBtn = document.getElementById("clearSnaps");
+
+if (clearBtn) {
+  clearBtn.addEventListener("click", () => {
+    chrome.storage.local.remove("snapshots", () => {
+      alert("📸 Snapshots cleared!");
+    });
+  });
+}

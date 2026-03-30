@@ -327,6 +327,34 @@ function addNoteButton(container) {
   }
 }
 
+//snapButton
+function addSnapButton(container) {
+
+  if (!container) return;
+  if (container.querySelector("#snapBtn")) return;
+
+  const btn = document.createElement("button");
+  btn.id = "snapBtn";
+
+  btn.innerHTML = `
+    <div style="display:flex; align-items:center; gap:6px;">
+      <span>📸</span>
+      <span>Snap</span>
+    </div>
+  `;
+
+  btn.style.background = "#f2f2f2";
+  btn.style.border = "none";
+  btn.style.borderRadius = "18px";
+  btn.style.padding = "6px 12px";
+  btn.style.marginLeft = "8px";
+  btn.style.cursor = "pointer";
+
+  btn.onclick = captureSnapshot;
+
+  container.appendChild(btn);
+}
+//-----------
 
 
 //---------OBSERVER FEATURE (HANDLE YOUTUBE DYNAMIC UI)------------>
@@ -365,6 +393,7 @@ function attachButtonObserver() {
     noteContainerWaiter = null;
 
     addNoteButton(container);
+    addSnapButton(container);
 
     noteButtonObserver = new MutationObserver(() => {
       addNoteButton(container);
@@ -523,3 +552,80 @@ chrome.runtime.onMessage.addListener((msg) => {
 
 // Run once when script loads.
 applyDarkModeFromStorage();
+
+
+//snap logic
+function captureSnapshot() {
+  const video = document.querySelector("video");
+
+  if (!video) {
+    alert("No video found");
+    return;
+  }
+
+  const canvas = document.createElement("canvas");
+
+  // SAFE SIZE (important for storage)
+  canvas.width = 640;
+  canvas.height = 360;
+
+  const ctx = canvas.getContext("2d");
+  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+  // COMPRESSED IMAGE
+  const image = canvas.toDataURL("image/jpeg", 0.5);
+
+  chrome.storage.local.get("snapshots", (data) => {
+  let snaps = data.snapshots || [];
+
+
+    if (snaps.length >= 15) {
+      alert("Max 15 snapshots allowed");
+      return;
+    }
+
+   snaps.push({
+  img: image,
+  time: Date.now()
+});
+
+    chrome.storage.local.set({ snapshots: snaps }, () => {
+      console.log("📸 Snapshot saved:", snaps.length);
+showSnapNotification(`📸 Snapshot ${snaps.length} saved`);
+    });
+  });
+}
+//-------------
+
+function showSnapNotification(message) {
+  const notif = document.createElement("div");
+
+  notif.innerText = message;
+
+  notif.style.position = "fixed";
+  notif.style.bottom = "30px";
+  notif.style.right = "30px";
+  notif.style.background = "#000";
+  notif.style.color = "#fff";
+  notif.style.padding = "12px 18px";
+  notif.style.borderRadius = "10px";
+  notif.style.fontSize = "14px";
+  notif.style.fontWeight = "600";
+  notif.style.zIndex = "999999999"; // VERY HIGH
+  notif.style.boxShadow = "0 4px 12px rgba(0,0,0,0.4)";
+  notif.style.opacity = "0";
+  notif.style.transition = "opacity 0.3s ease";
+
+  //  CHANGE HERE (IMPORTANT)
+  document.documentElement.appendChild(notif);
+
+  // force render
+  requestAnimationFrame(() => {
+    notif.style.opacity = "1";
+  });
+
+  setTimeout(() => {
+    notif.style.opacity = "0";
+    setTimeout(() => notif.remove(), 300);
+  }, 2000);
+}
