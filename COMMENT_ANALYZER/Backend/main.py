@@ -106,7 +106,7 @@ async def basic_request_logger(request: Request, call_next):
     return await call_next(request)
 
 
-def analyze_sentiment_batch(comments: List[str], chunk_size: int = 128):
+def analyze_sentiment_batch(comments: List[str], chunk_size: int = 8):
     """
     Batch-safe inference helper.
     - Accepts up to 1000 comments per API request (validated in route).
@@ -145,7 +145,7 @@ def analyze_sentiment_batch(comments: List[str], chunk_size: int = 128):
             return_tensors="pt",
             truncation=True,
             padding=True,
-            max_length=256
+            max_length=128
         )
 
         with torch.no_grad():
