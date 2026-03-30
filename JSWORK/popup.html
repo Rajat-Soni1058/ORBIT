@@ -11,20 +11,20 @@
     margin: 0;
     padding: 0;
     background:
-      radial-gradient(circle at 18% -12%, rgba(35, 85, 188, 0.35), transparent 36%),
-      radial-gradient(circle at 84% 18%, rgba(18, 182, 215, 0.24), transparent 34%),
-      linear-gradient(180deg, #070d1f 0%, #040812 100%);
+      radial-gradient(circle at 18% -12%, rgba(44, 201, 232, 0.28), transparent 36%),
+      radial-gradient(circle at 84% 18%, rgba(16, 132, 168, 0.2), transparent 34%),
+      linear-gradient(180deg, #05111a 0%, #03080e 100%);
   }
 
   :root {
-    --bg: #050915;
-    --panel: #080f22;
-    --panel-soft: #0b1430;
-    --stroke: rgba(130, 157, 204, 0.22);
-    --text: #dbe8ff;
-    --muted: #96a8cb;
-    --accent: #12b6d7;
-    --accent-2: #1f77ff;
+    --bg: #03080e;
+    --panel: #08151f;
+    --panel-soft: #0d1f2d;
+    --stroke: rgba(90, 210, 235, 0.24);
+    --text: #ffffff;
+    --muted: #93aabd;
+    --accent: #39cbea;
+    --accent-2: #1f89b3;
   }
 
   * {
@@ -39,37 +39,37 @@
     font-family: "Manrope", "Segoe UI", Arial, sans-serif;
     text-align: center;
     background:
-      radial-gradient(circle at 18% -12%, rgba(35, 85, 188, 0.35), transparent 36%),
-      radial-gradient(circle at 84% 18%, rgba(18, 182, 215, 0.24), transparent 34%),
-      linear-gradient(180deg, #070d1f 0%, #040812 100%);
+      radial-gradient(circle at 18% -12%, rgba(44, 201, 232, 0.28), transparent 36%),
+      radial-gradient(circle at 84% 18%, rgba(16, 132, 168, 0.2), transparent 34%),
+      linear-gradient(180deg, #05111a 0%, #03080e 100%);
     color: var(--text);
     overflow: hidden;
   }
 
   .app-shell {
-    border-radius: 22px;
-    padding: 12px;
+    border-radius: 18px;
+    padding: 10px;
     margin: 0;
-    background: linear-gradient(180deg, rgba(10, 18, 42, 0.94), rgba(5, 10, 24, 0.96));
-    border: 1px solid rgba(123, 153, 206, 0.18);
-    box-shadow: 0 14px 36px rgba(0, 0, 0, 0.35);
+    background: linear-gradient(180deg, rgba(9, 20, 30, 0.98), rgba(4, 12, 20, 0.99));
+    border: 1px solid rgba(80, 199, 230, 0.22);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
   }
 
   #mainBox {
-    min-height: 196px;
-    max-height: 250px;
+    min-height: 140px;
+    max-height: 210px;
     overflow-y: auto;
     background:
-      radial-gradient(circle at 78% 18%, rgba(38, 157, 255, 0.24), transparent 36%),
-      linear-gradient(180deg, rgba(7, 15, 36, 0.97), rgba(5, 11, 26, 0.96));
-    border: 1px solid var(--stroke);
-    border-radius: 16px;
+      radial-gradient(circle at 78% 18%, rgba(59, 200, 235, 0.24), transparent 38%),
+      linear-gradient(180deg, rgba(6, 16, 25, 0.98), rgba(4, 11, 18, 0.97));
+    border: 1px solid rgba(88, 196, 226, 0.26);
+    border-radius: 14px;
     display: flex;
     flex-direction: column;
     align-items: stretch;
     justify-content: flex-start;
-    padding: 14px;
-    transition: all 0.28s ease;
+    padding: 12px;
+    transition: all 0.24s ease;
   }
 
   #timerUI {
@@ -100,7 +100,12 @@
   }
 
   #mainBox::-webkit-scrollbar-thumb {
-    background: rgba(140, 168, 217, 0.36);
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 8px;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.9);
     border-radius: 8px;
   }
 
@@ -127,12 +132,13 @@
     padding: 10px;
     min-height: 70px;
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
-    border: 1px solid rgba(138, 168, 221, 0.2);
+    border: 1px solid rgba(95, 196, 226, 0.26);
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
     gap: 4px;
-    color: #08203d;
+    color: #ffffff;
+    background: #0f4a68;
   }
 
   .note-top {
@@ -146,9 +152,10 @@
     margin: 0;
     font-size: 14px;
     line-height: 1.2;
-    color: #0a223d;
+    color: #ffffff;
     font-weight: 800;
     word-break: break-word;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
   }
 
   .note-bullet {
@@ -156,7 +163,7 @@
     width: 8px;
     height: 8px;
     margin-right: 6px;
-    background: #072142;
+    background: #000000;
     border-radius: 50%;
     vertical-align: middle;
   }
@@ -170,11 +177,12 @@
   }
 
   .open-note-btn {
-    color: #0d2f56;
+    color: #ffffff;
     font-size: 12px;
     font-weight: 700;
     text-decoration: none;
     cursor: pointer;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
   }
 
   .open-note-btn:hover {
@@ -184,7 +192,7 @@
   .delete-note-btn {
     cursor: pointer;
     font-size: 14px;
-    color: #b42318;
+    color: #9ee9ff;
     transition: transform 0.15s ease;
   }
 
@@ -205,7 +213,7 @@
   h4 {
     margin: 4px 0 10px;
     font-size: 16px;
-    color: #b8ceff;
+    color: #ffffff;
     letter-spacing: 0.35px;
     text-align: left;
   }
@@ -215,29 +223,35 @@
     padding: 11px 12px;
     margin-top: 8px;
     border-radius: 10px;
-    border: 1px solid rgba(143, 168, 214, 0.24);
+    border: 1px solid rgba(90, 198, 228, 0.28);
     outline: none;
     font-size: 14px;
     transition: 0.22s;
-    background: rgba(8, 18, 42, 0.88);
-    color: #d9e8ff;
+    background: rgba(8, 24, 36, 0.88);
+    color: #ffffff;
   }
 
   input::placeholder {
-    color: #8ba1c8;
+    color: #8fb2c6;
   }
 
   input:focus {
-    border-color: rgba(43, 185, 255, 0.7);
-    box-shadow: 0 0 0 3px rgba(41, 161, 255, 0.16);
+    border-color: rgba(93, 210, 242, 0.72);
+    box-shadow: 0 0 0 3px rgba(64, 196, 235, 0.2);
+  }
+
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button {
+    opacity: 1;
+    filter: invert(78%) sepia(39%) saturate(523%) hue-rotate(152deg) brightness(104%) contrast(97%);
   }
 
   #startBtn {
     margin-top: 12px;
     width: 100%;
     padding: 10px 16px;
-    background: linear-gradient(135deg, #18b7d7, #1f6ffd);
-    color: #f4faff;
+    background: linear-gradient(135deg, #3ccbe8, #1f88b0);
+    color: #ffffff;
     border: none;
     border-radius: 10px;
     cursor: pointer;
@@ -255,7 +269,7 @@
     font-size: 30px;
     font-weight: 800;
     margin-top: 12px;
-    color: #d6ecff;
+    color: #94ecff;
     text-align: center;
   }
 
@@ -263,72 +277,88 @@
     display: flex;
     gap: 10px;
     width: 100%;
-    margin-top: 8px;
-    margin-bottom: 4px;
+    margin: 0;
   }
 
   .orbital {
     width: 100%;
-    padding: 12px;
-    background: linear-gradient(180deg, #0a1230, #070d25);
-    border: none;
-    border-radius: 14px;
-    border: 1px solid rgba(128, 157, 211, 0.24);
+    padding: 11px;
+    background: linear-gradient(180deg, rgba(12, 26, 38, 0.82), rgba(7, 17, 28, 0.88));
+    border: 1px solid rgba(86, 201, 232, 0.3);
+    border-radius: 12px;
     cursor: pointer;
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 700;
-    color: #cde4ff;
-    transition: transform 0.22s ease, opacity 0.22s ease, border-color 0.22s ease;
+    color: #ffffff;
+    transition: all 0.18s cubic-bezier(0.2, 0.8, 0.3, 1);
     display: inline-flex;
     justify-content: center;
     align-items: center;
     gap: 6px;
-    letter-spacing: 0.2px;
-    margin: 4px 0;
+    letter-spacing: 0.25px;
+    margin: 3px 0;
   }
 
   .orbital:hover {
-    transform: translateY(-1px);
-    border-color: rgba(108, 219, 255, 0.56);
-    opacity: 0.99;
+    transform: translateY(-2px);
+    border-color: rgba(115, 225, 252, 0.78);
+    background: linear-gradient(180deg, rgba(16, 34, 49, 0.92), rgba(9, 22, 35, 0.92));
+    box-shadow: 0 6px 16px rgba(72, 204, 238, 0.22);
+    opacity: 1;
   }
 
   .orbital:active,
   .orbital.is-active {
-    background: linear-gradient(90deg, #17b4d8, #0f9cc0);
-    color: #03131c;
-    border-color: transparent;
+    background: linear-gradient(90deg, #3ac7e3, #1c7da2);
+    color: #ffffff;
+    border-color: rgba(112, 228, 255, 0.82);
     font-weight: 800;
+    box-shadow: 0 4px 12px rgba(64, 201, 236, 0.32);
+  }
+
+  .orbital:disabled {
+    background: linear-gradient(180deg, rgba(9, 18, 28, 0.6), rgba(6, 13, 20, 0.6)) !important;
+    color: #66859a !important;
+    border-color: rgba(88, 191, 220, 0.14) !important;
+    cursor: not-allowed !important;
+    opacity: 0.5 !important;
+    box-shadow: none !important;
+  }
+
+  .orbital:disabled:hover {
+    transform: none !important;
+    border-color: rgba(88, 191, 220, 0.14) !important;
   }
 
   .orbital.icon-grid {
-    min-height: 64px;
+    min-height: 58px;
     flex-direction: column;
-    gap: 4px;
+    gap: 3px;
   }
 
   .btn-emoji {
-    font-size: 16px;
+    font-size: 18px;
     line-height: 1;
   }
 
   .btn-label {
-    font-size: 11px;
+    font-size: 10px;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.6px;
+    font-weight: 800;
   }
 
   .orbit-brand {
     font-family: "Orbitron", "Manrope", sans-serif;
-    font-weight: 800;
-    color: #f2f8ff;
-    font-size: 40px;
-    letter-spacing: 1.5px;
+    font-weight: 900;
+    color: #000000;
+    font-size: 32px;
+    letter-spacing: 1.8px;
     display: inline-block;
     text-align: center;
     text-shadow:
-      0 0 12px rgba(104, 183, 255, 0.32),
-      0 0 28px rgba(9, 108, 224, 0.2);
+      0 0 8px rgba(94, 224, 255, 0.5),
+      0 0 20px rgba(26, 154, 194, 0.36);
   }
 
   .orbit-white {
@@ -336,11 +366,12 @@
   }
 
   .orbit-tagline {
-    margin-top: 4px;
-    font-size: 14px;
-    color: #c9dbff;
-    opacity: 0.9;
-    font-weight: 500;
+    margin-top: 2px;
+    font-size: 12px;
+    color: #c8f1ff;
+    opacity: 0.88;
+    font-weight: 600;
+    letter-spacing: 0.3px;
   }
 
   .orbit-animate {
@@ -389,17 +420,36 @@
 
   .hero-shell {
     width: 100%;
-    min-height: 156px;
-    border-radius: 10px;
-    border: 1px solid rgba(130, 160, 212, 0.26);
+    min-height: 96px;
+    border-radius: 12px;
+    border: 1px solid rgba(90, 198, 228, 0.42);
     background:
-      radial-gradient(circle at 75% 22%, rgba(23, 148, 255, 0.4), transparent 30%),
-      radial-gradient(circle at 42% 40%, rgba(41, 186, 255, 0.17), transparent 38%),
-      linear-gradient(145deg, rgba(4, 9, 24, 0.94), rgba(8, 15, 32, 0.92));
+      radial-gradient(ellipse 280% 200% at 65% 15%, rgba(39, 185, 224, 0.52), transparent 45%),
+      radial-gradient(circle at 35% 50%, rgba(84, 223, 255, 0.2), transparent 42%),
+      linear-gradient(135deg, rgba(4, 17, 31, 0.96), rgba(5, 23, 37, 0.94));
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 10px;
+    padding: 8px;
+  }
+
+  .controls {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 8px;
+    animation: slideUp 0.42s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 
   @media (max-width: 360px) {
@@ -437,44 +487,35 @@
   <div id="notesView"></div>
 
   <!-- EMPTY / BRAND VIEW -->
-  <div id="emptyView" style="width:100%; height:220px;">
+  <div id="emptyView" style="width:100%; flex: 1;">
     <div class="hero-shell">
       <div style="text-align:center; width:100%;">
-        <div class="orbit-brand" aria-hidden="true"><strong>ORBIT</strong></div>
-        <div class="orbit-tagline">Watch smarter, not distracted</div>
+        <div class="orbit-brand" aria-hidden="true"><strong>O R B I T</strong></div>
+        <div class="orbit-tagline">Stay in your ORBIT</div>
       </div>
     </div>
   </div>
 
 </div>
 
-<div class="button-row">
-  <button id="toggleDark" class="orbital icon-grid" style="flex:1;">
-    <span class="btn-emoji">🌓</span>
-    <span class="btn-label">Mode</span>
-  </button>
+<div class="controls">
+  <div class="button-row">
+    <button id="toggleDark" class="orbital" style="flex:1;">🔆 Dark Mode</button>
+    <button id="bottomBtn" class="orbital" style="flex:1;">⏳ Set Timer</button>
+  </div>
 
-  <button id="bottomBtn" class="orbital icon-grid" style="flex:1;">
-    <span class="btn-emoji">🕔</span>
-    <span class="btn-label">Timer</span>
-  </button>
-</div>
+  <div class="button-row">
+    <button id="showNotes" class="orbital" style="flex:1;">📒 Show Notes</button>
+    <button id="analyzeVideo" class="orbital" style="flex:1;">🧠 Video Analyzer</button>
+  </div>
 
-<button id="toggleRecommend" class="orbital">Hide Recommendations</button>
-<button id="toggleComments" class="orbital">Hide Comments</button>
+  <div class="button-row">
+    <button id="generatePDF" class="orbital" style="flex:1;">📄 Generate PDF</button>
+    <button id="clearSnaps" class="orbital" style="flex:1;">🧹 Clear PDF Stack</button>
+  </div>
 
-<button id="showNotes" class="orbital">📔 Show Notes</button>
-
-<div class="button-row">
-  <button id="analyzeVideo" class="orbital" style="flex:1;">🔍 Video Analyzer</button>
-</div>
-
-<!--  NEW ROW -->
-<div class="button-row">
-  <button id="generatePDF" class="orbital" style="flex:1;">📄 Generate PDF</button>
-  <button id="clearSnaps" class="orbital" style="flex:1;">🧹 Clear</button>
-</div>
-
+  <button id="toggleRecommend" class="orbital">🙈 Hide Recommendations</button>
+  <button id="toggleComments" class="orbital">Hide Comments</button>
 </div>
 
 <script src="popup.js"></script>

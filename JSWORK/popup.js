@@ -98,8 +98,8 @@ window.onload = () => {
   if (toggleBtn) {
     chrome.storage.local.get("hideRecommended", (data) => {
       toggleBtn.innerText = data.hideRecommended
-        ? "Show Recommendations"
-        : "Hide Recommendations";
+        ? "🐵 Show Recommendations"
+        : "🙈 Hide Recommendations";
     });
   }
 
@@ -151,7 +151,7 @@ window.onload = () => {
       startBtn.innerText = "Start";
       startBtn.disabled = false;
 
-      bottomBtn.innerText = "🕔 Set Timer";
+      bottomBtn.innerText = "⏳ Set Timer";
 
       // update empty view after reset
       updateEmptyView();
@@ -230,7 +230,7 @@ function startCountdown() {
       messageInput.style.display = "block";
       startBtn.style.display = "inline-block";
       startBtn.innerText = "Start";
-      bottomBtn.innerText = "🕔 Set Timer";
+      bottomBtn.innerText = "⏳ Set Timer";
       // timer ended — update empty/brand visibility
       updateEmptyView();
       return;
@@ -272,8 +272,8 @@ function updateDisplay() {
         chrome.storage.local.set({ hideRecommended: newState });
 
         toggleBtn.innerText = newState
-          ? "Show Recommendations"
-          : "Hide Recommendations";
+          ? "🐵 Show Recommendations"
+          : "🙈 Hide Recommendations";
 
         chrome.tabs.query({ url: "*://*.youtube.com/*" }, (tabs) => {
 
@@ -368,7 +368,7 @@ function updateDisplay() {
 
       const notes = data.notes || {};
       const noteEntries = Object.entries(notes);
-      const palette = ["#f5ef9a", "#f7c7cf", "#9fd4f2", "#c6f0cf", "#c7d2fe", "#fde68a"];
+      const palette = ["#0f4a68", "#0f4a68", "#0f4a68", "#0f4a68", "#0f4a68", "#0f4a68"];
 
       // build full notes HTML once data is available
       notesView.innerHTML = `
@@ -545,6 +545,16 @@ function updateDisplay() {
 
   if (analyzeBtn) {
     analyzeBtn.addEventListener('click', async () => {
+      // Quick verification video page is still open
+      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        const tab = (tabs && tabs[0]) || null;
+        if (!tab || !tab.url || !tab.url.includes('youtube.com') || 
+            (!tab.url.includes('/watch?v=') && !tab.url.includes('/shorts/'))) {
+          alert('Open a YouTube video to analyze.');
+          checkVideoAvailability();
+          return;
+        }
+
       // prepare UI: hide timer, show notesView as analyzer canvas
       timerUI.style.display = 'none';
       notesView.style.display = 'block';
@@ -554,12 +564,13 @@ function updateDisplay() {
       if (emptyView) emptyView.classList.remove('empty-visible');
 
       notesView.innerHTML = `
-        <div class="notes-header"><span>Video Analyzer</span></div>
-        <div id="analyzerStatus" class="notes-loading">Preparing analysis…</div>
-        <div id="analyzerResults" style="margin-top:12px; text-align:center;"></div>
+        <div class="notes-header" style="margin:0 0 6px;"><span>Video Analyzer</span></div>
+        <div id="analyzerStatus" class="notes-loading" style="padding:4px 8px 6px; margin:0; font-size:13px;">Preparing analysis…</div>
+        <div id="analyzerResults" style="margin-top:6px; text-align:center;"></div>
       `;
 
       // find active YouTube tab
+      });
       chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
         const tab = (tabs && tabs[0]) || null;
         if (!tab || !tab.url || !tab.url.includes('youtube.com')) {
@@ -675,39 +686,37 @@ console.log("⭐ Rating (popup):", rating);
 //-----
           const results = document.getElementById('analyzerResults');
           results.innerHTML = `
-  <div style="font-size:18px; font-weight:700;">Sentiment Summary</div>
+  <div style="font-size:18px; font-weight:700; margin:0 0 8px;">Sentiment Summary</div>
 
-  <div style="display:flex; flex-direction:column; align-items:center; gap:12px; margin-top:12px; padding:12px 12px 18px; box-sizing:border-box;">
-    
-    <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap; width:100%;">
-      
-      <div style="background:#d1fae5; padding:12px 18px; border-radius:8px; min-width:100px;">
-        <div style="font-size:14px; color:#065f46;">Positive</div>
-        <div style="font-size:20px; font-weight:800; color:#065f46;">${totalPositive}</div>
+  <div style="margin-top:6px; padding:8px; box-sizing:border-box;">
+    <div style="
+      display:grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap:12px;
+      width:100%;
+      max-width:290px;
+      margin:0 auto;
+    ">
+      <div style="background:#0f4f63; border:1px solid rgba(116, 228, 255, 0.24); border-radius:10px; height:110px; padding:12px; display:flex; flex-direction:column; justify-content:center; align-items:center;">
+        <div style="font-size:14px; color:#b9f5ff; line-height:1.1;">Positive</div>
+        <div style="margin-top:6px; font-size:36px; font-weight:800; color:#b9f5ff; line-height:1;">${totalPositive}</div>
       </div>
 
-      <div style="background:#fee2e2; padding:12px 18px; border-radius:8px; min-width:100px;">
-        <div style="font-size:14px; color:#991b1b;">Negative</div>
-        <div style="font-size:20px; font-weight:800; color:#991b1b;">${totalNegative}</div>
+      <div style="background:#11415b; border:1px solid rgba(116, 228, 255, 0.2); border-radius:10px; height:110px; padding:12px; display:flex; flex-direction:column; justify-content:center; align-items:center;">
+        <div style="font-size:14px; color:#a9e6ff; line-height:1.1;">Negative</div>
+        <div style="margin-top:6px; font-size:36px; font-weight:800; color:#a9e6ff; line-height:1;">${totalNegative}</div>
       </div>
 
+      <div style="background:#16384f; border:1px solid rgba(116, 228, 255, 0.18); border-radius:10px; height:110px; padding:12px; display:flex; flex-direction:column; justify-content:center; align-items:center;">
+        <div style="font-size:14px; color:#cbeeff; line-height:1.1;">Neutral</div>
+        <div style="margin-top:6px; font-size:36px; font-weight:800; color:#cbeeff; line-height:1;">${totalNeutral}</div>
+      </div>
+
+      <div style="background:#08273b; border:1px solid rgba(116, 228, 255, 0.28); border-radius:10px; height:110px; padding:12px; display:flex; flex-direction:column; justify-content:center; align-items:center;">
+        <div style="font-size:14px; color:#e7fbff; line-height:1.1;">Rating</div>
+        <div style="margin-top:6px; font-size:32px; font-weight:800; color:#e7fbff; line-height:1;">⭐ ${rating}/10</div>
+      </div>
     </div>
-
-    <div style="display:flex; gap:12px; justify-content:center;">
-      
-      <div style="background:#f8fafc; padding:12px 18px; border-radius:8px; min-width:100px;">
-        <div style="font-size:14px; color:#334155;">Neutral</div>
-        <div style="font-size:20px; font-weight:800; color:#334155;">${totalNeutral}</div>
-      </div>
-
-      <!-- ⭐ NEW RATING CARD -->
-      <div style="background:#111; padding:12px 18px; border-radius:8px; min-width:100px;">
-        <div style="font-size:14px; color:#fff;">Rating</div>
-        <div style="font-size:20px; font-weight:800; color:#fff;">⭐ ${rating}/10</div>
-      </div>
-
-    </div>
-
   </div>
 `;
 
@@ -723,13 +732,40 @@ console.log("⭐ Rating (popup):", rating);
 // DARK MODE TOGGLE
 const darkBtn = document.getElementById("toggleDark");
 
+// ---------VIDEO AVAILABILITY CHECK------------>
+function checkVideoAvailability() {
+  const analyzeBtn = document.getElementById('analyzeVideo');
+  if (!analyzeBtn) return;
+
+  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    const tab = (tabs && tabs[0]) || null;
+    const isYouTube = tab && tab.url && tab.url.includes('youtube.com');
+    const isVideoPage = isYouTube && (tab.url.includes('/watch?v=') || tab.url.includes('/shorts/'));
+
+    if (!isVideoPage) {
+      analyzeBtn.disabled = true;
+      analyzeBtn.style.opacity = '0.5';
+      analyzeBtn.style.cursor = 'not-allowed';
+      analyzeBtn.title = 'Open a YouTube video to analyze';
+    } else {
+      analyzeBtn.disabled = false;
+      analyzeBtn.style.opacity = '1';
+      analyzeBtn.style.cursor = 'pointer';
+      analyzeBtn.title = 'Analyze video comments';
+    }
+  });
+}
+
+// Check video on popup open
+setTimeout(checkVideoAvailability, 20);
+
 if (darkBtn) {
 
   // Load saved state
   chrome.storage.local.get("darkMode", (data) => {
     darkBtn.innerText = data.darkMode
-      ? "🌓 Light Mode"
-      : "🌓 Dark Mode";
+      ? "🔆 Light Mode"
+      : "🔆 Dark Mode";
   });
 
   darkBtn.addEventListener("click", () => {
@@ -741,8 +777,8 @@ if (darkBtn) {
       chrome.storage.local.set({ darkMode: newState });
 
       darkBtn.innerText = newState
-        ? "🌓 Light Mode"
-        : "🌓 Dark Mode";
+        ? "🔆 Light Mode"
+        : "🔆 Dark Mode";
 
       // Send message to YouTube tabs
       chrome.tabs.query({ url: "*://*.youtube.com/*" }, (tabs) => {

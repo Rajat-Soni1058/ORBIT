@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "WithinOrbit",
+  "name": "ORBIT",
   "version": "1.0",
   "description": "Focus timer with YouTube pause feature",
 
@@ -20,13 +20,18 @@
   },
 
   "action": {
+    "default_icon": {
+      "16": "DiamondIcon.png",
+      "48": "DiamondIcon.png",
+      "128": "DiamondIcon.png"
+    },
     "default_popup": "popup.html"
   },
 
   "icons": {
-    "16": "ClockImage.png",
-    "48": "ClockImage.png",
-    "128": "ClockImage.png"
+    "16": "DiamondIcon.png",
+    "48": "DiamondIcon.png",
+    "128": "DiamondIcon.png"
   },
 
   "content_scripts": [
