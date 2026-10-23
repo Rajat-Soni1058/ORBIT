@@ -1,0 +1,46 @@
+{
+  "manifest_version": 3,
+  "name": "ORBIT",
+  "version": "1.0",
+  "description": "Focus timer with YouTube pause feature",
+
+  "permissions": [
+    "alarms",
+    "tabs",
+    "notifications",
+    "storage",
+    "scripting"
+  ],
+
+  "host_permissions": [
+    "*://*.youtube.com/*",
+    "http://127.0.0.1:8000/*"
+  ],
+
+  "background": {
+    "service_worker": "background.js"
+  },
+
+  "action": {
+    "default_icon": {
+      "16": "DiamondIcon.png",
+      "48": "DiamondIcon.png",
+      "128": "DiamondIcon.png"
+    },
+    "default_popup": "popup.html"
+  },
+
+  "icons": {
+    "16": "DiamondIcon.png",
+    "48": "DiamondIcon.png",
+    "128": "DiamondIcon.png"
+  },
+
+  "content_scripts": [
+    {
+      "matches": ["*://*.youtube.com/*"],
+      "js": ["content.js"],
+      "run_at": "document_start"
+    }
+  ]
+}
