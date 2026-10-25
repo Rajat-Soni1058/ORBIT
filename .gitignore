@@ -1,0 +1,72 @@
+
+datasets/
+
+# Python bytecode and caches
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.hypothesis/
+
+# Virtual environments
+.venv/
+.venv*/
+venv/
+env/
+ENV/
+
+# Python packaging and test coverage output
+*.egg-info/
+.coverage
+.coverage.*
+htmlcov/
+build/
+dist/
+
+# Notebook checkpoints
+.ipynb_checkpoints/
+
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+
+# Generated and downloaded model artifacts
+COMMENT_ANALYZER/Backend/models/
+COMMENT_ANALYZER/Backend/results/
+*.pkl
+*.pickle
+*.safetensors
+*.h5
+*.pt
+*.pth
+*.onnx
+
+# Logs and temporary files
+*.log
+*.tmp
+*.temp
+tmp/
+temp/
+
+# JavaScript dependencies and build output
+node_modules/
+.npm/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.tsbuildinfo
+
+# Local editor and operating-system files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+Desktop.ini
+*.swp
+*.swo
+
+# Downloaded model files
+COMMENT_ANALYZER/Backend/results/distilbert/
